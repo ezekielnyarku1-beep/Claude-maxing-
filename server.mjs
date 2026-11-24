@@ -2,11 +2,13 @@ import { createServer } from 'node:http'
 import { resolve } from 'node:path'
 import express from 'express'
 import { toNodeHandler } from 'better-auth/node'
+import { createServer as createViteServer } from 'vite'
 import { auth, pool } from './server/auth.mjs'
 
 const app = express()
 const httpServer = createServer(app)
 const isProduction = process.argv.includes('--production') || process.env.NODE_ENV === 'production'
+let vite
 
 app.all('/api/auth/*splat', toNodeHandler(auth))
 
@@ -21,9 +23,18 @@ if (isProduction) {
 
     response.sendFile(resolve(distPath, 'index.html'))
   })
+} else {
+  vite = await createViteServer({
+    appType: 'spa',
+    server: {
+      middlewareMode: true,
+      hmr: { server: httpServer },
+    },
+  })
+  app.use(vite.middlewares)
 }
 
-const port = Number(isProduction ? process.env.PORT ?? 5175 : process.env.API_PORT ?? 3001)
+const port = Number(process.env.PORT ?? 5175)
 const host = process.env.HOST ?? '127.0.0.1'
 
 httpServer.listen(port, host, () => {
@@ -32,6 +43,7 @@ httpServer.listen(port, host, () => {
 
 async function shutdown() {
   await new Promise(resolveClose => httpServer.close(resolveClose))
+  await vite?.close()
   await pool.end()
 }
 
