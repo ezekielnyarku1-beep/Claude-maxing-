@@ -7,6 +7,8 @@ import { labelsRouter } from './routes/labels.js'
 import { meRouter } from './routes/me.js'
 import { projectsRouter } from './routes/projects.js'
 import { teamsRouter } from './routes/teams.js'
+import { usersRouter } from './routes/users.js'
+import { workspaceRouter } from './routes/workspace.js'
 
 export function createApp({ clientOrigin, authenticate }) {
   const app = express()
@@ -24,6 +26,8 @@ export function createApp({ clientOrigin, authenticate }) {
   app.use('/api/projects', projectsRouter)
   app.use('/api/issues', issuesRouter)
   app.use('/api/labels', labelsRouter)
+  app.use('/api/users', usersRouter)
+  app.use('/api/workspace', workspaceRouter)
 
   app.use(notFoundHandler)
   app.use(errorHandler)

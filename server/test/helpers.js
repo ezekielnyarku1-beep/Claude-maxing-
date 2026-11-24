@@ -51,6 +51,7 @@ export async function resetDatabase() {
   await prisma.label.deleteMany()
   await prisma.team.deleteMany()
   await prisma.user.deleteMany()
+  await prisma.workspace.deleteMany()
 }
 
 export const admin = 'admin@test.example'

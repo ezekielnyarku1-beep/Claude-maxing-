@@ -141,3 +141,9 @@ model IssueActivity {
 
   @@index([issueId])
 }
+
+model Workspace {
+  id        Int      @id @default(1)
+  name      String
+  updatedAt DateTime @updatedAt
+}

@@ -22,9 +22,9 @@ function CreateIssueForm({ teams, defaultTeamKey, onClose }) {
   }
 
   return (
-    <form className="create-issue" onSubmit={submit}>
+    <form className="dialog-form" onSubmit={submit}>
       <h2>New issue</h2>
-      <div className="create-issue-row">
+      <div className="dialog-form-row">
         <label>
           Team
           <select className="input" value={fields.teamKey} onChange={set('teamKey')}>

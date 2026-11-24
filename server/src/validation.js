@@ -30,10 +30,13 @@ export function isId(value) {
   return typeof value === 'string' && uuidPattern.test(value)
 }
 
-export function readOptionalId(value, label) {
-  if (value === null) return null
+export function readId(value, label) {
   if (!isId(value)) throw new HttpError(400, `${label} is not valid.`)
   return value
+}
+
+export function readOptionalId(value, label) {
+  return value === null ? null : readId(value, label)
 }
 
 export function readIdList(value, label) {

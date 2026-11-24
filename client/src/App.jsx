@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router'
 import GuestOnly from './components/GuestOnly.jsx'
+import RequireAdmin from './components/RequireAdmin.jsx'
 import RequireSession from './components/RequireSession.jsx'
 import Shell from './components/Shell.jsx'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage.jsx'
@@ -12,6 +13,11 @@ import NotFoundPage from './pages/NotFoundPage.jsx'
 import ProjectPage from './pages/ProjectPage.jsx'
 import ProjectsPage from './pages/ProjectsPage.jsx'
 import TeamIssuesPage from './pages/TeamIssuesPage.jsx'
+import LabelsSettingsPage from './pages/settings/LabelsSettingsPage.jsx'
+import SettingsLayout from './pages/settings/SettingsLayout.jsx'
+import TeamsSettingsPage from './pages/settings/TeamsSettingsPage.jsx'
+import UsersSettingsPage from './pages/settings/UsersSettingsPage.jsx'
+import WorkspaceSettingsPage from './pages/settings/WorkspaceSettingsPage.jsx'
 
 export default function App() {
   return (
@@ -30,6 +36,15 @@ export default function App() {
           <Route path="projects" element={<ProjectsPage />} />
           <Route path="projects/:projectId" element={<ProjectPage />} />
           <Route path="issue/:identifier" element={<IssuePage />} />
+          <Route path="settings" element={<RequireAdmin />}>
+            <Route element={<SettingsLayout />}>
+              <Route index element={<Navigate to="workspace" replace />} />
+              <Route path="workspace" element={<WorkspaceSettingsPage />} />
+              <Route path="users" element={<UsersSettingsPage />} />
+              <Route path="teams" element={<TeamsSettingsPage />} />
+              <Route path="labels" element={<LabelsSettingsPage />} />
+            </Route>
+          </Route>
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Route>

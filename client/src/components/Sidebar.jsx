@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router'
 import Avatar from './Avatar.jsx'
 import { signOut } from '../lib/auth.js'
-import { useMe, useTeams } from '../lib/queries.js'
+import { useMe, useTeams, useWorkspace } from '../lib/queries.js'
 import { useShell } from '../lib/shellContext.js'
 import { useFormAction } from '../lib/useFormAction.js'
 
@@ -10,7 +10,9 @@ export default function Sidebar() {
   const navigate = useNavigate()
   const me = useMe()
   const teams = useTeams()
+  const workspace = useWorkspace()
   const logOut = useFormAction()
+  const isAdmin = me.data?.role === 'ADMIN'
 
   return (
     <nav className="sidebar" aria-label="Main">
@@ -20,7 +22,10 @@ export default function Sidebar() {
           <rect x="7" y="5" width="4" height="12" rx="1" />
           <rect x="13" y="1" width="4" height="16" rx="1" />
         </svg>
-        <span>Overview Teams</span>
+        <span className="sidebar-brand-text">
+          Overview Teams
+          {workspace.data && <span className="sidebar-workspace">{workspace.data.name}</span>}
+        </span>
       </div>
 
       <div className="sidebar-actions">
@@ -45,6 +50,13 @@ export default function Sidebar() {
             Projects
           </NavLink>
         </li>
+        {isAdmin && (
+          <li>
+            <NavLink to="/settings" className="sidebar-item">
+              Settings
+            </NavLink>
+          </li>
+        )}
       </ul>
 
       <h2 className="sidebar-heading" id="sidebar-teams">
@@ -73,7 +85,7 @@ export default function Sidebar() {
         <div className="sidebar-user">
           <Avatar name={me.data.name} />
           <span className="sidebar-user-name">{me.data.name}</span>
-          <span className="muted">{me.data.role === 'ADMIN' ? 'Admin' : 'Member'}</span>
+          <span className="muted">{isAdmin ? 'Admin' : 'Member'}</span>
         </div>
       )}
       <button

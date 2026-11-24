@@ -1,16 +1,27 @@
+import { useState } from 'react'
 import { Link } from 'react-router'
 import PageHeader from '../components/PageHeader.jsx'
 import ProgressBar from '../components/ProgressBar.jsx'
+import ProjectFormDialog from '../components/ProjectFormDialog.jsx'
 import QueryState from '../components/QueryState.jsx'
 import { formatDateWithYear } from '../lib/format.js'
-import { useProjects } from '../lib/queries.js'
+import { useIsAdmin, useProjects } from '../lib/queries.js'
 
 export default function ProjectsPage() {
   const projects = useProjects()
+  const isAdmin = useIsAdmin()
+  const [creating, setCreating] = useState(false)
 
   return (
     <div className="projects-page">
-      <PageHeader title="Projects" meta={projects.data && `${projects.data.length} projects`} />
+      <PageHeader title="Projects" meta={projects.data && `${projects.data.length} projects`}>
+        {isAdmin && (
+          <button type="button" className="button is-primary" onClick={() => setCreating(true)}>
+            New project
+          </button>
+        )}
+      </PageHeader>
+      {creating && <ProjectFormDialog onClose={() => setCreating(false)} />}
       <QueryState query={projects} label="projects">
         {data =>
           data.length === 0 ? (
