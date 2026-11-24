@@ -1,12 +1,16 @@
-import { NavLink } from 'react-router'
+import { NavLink, useNavigate } from 'react-router'
 import Avatar from './Avatar.jsx'
+import { signOut } from '../lib/auth.js'
 import { useMe, useTeams } from '../lib/queries.js'
 import { useShell } from '../lib/shellContext.js'
+import { useFormAction } from '../lib/useFormAction.js'
 
 export default function Sidebar() {
   const { openCreateIssue, openCommandMenu } = useShell()
+  const navigate = useNavigate()
   const me = useMe()
   const teams = useTeams()
+  const logOut = useFormAction()
 
   return (
     <nav className="sidebar" aria-label="Main">
@@ -71,6 +75,22 @@ export default function Sidebar() {
           <span className="sidebar-user-name">{me.data.name}</span>
           <span className="muted">{me.data.role === 'ADMIN' ? 'Admin' : 'Member'}</span>
         </div>
+      )}
+      <button
+        type="button"
+        className="sidebar-item"
+        disabled={logOut.busy}
+        onClick={() => logOut.run(async () => {
+          await signOut()
+          navigate('/login', { replace: true })
+        })}
+      >
+        {logOut.busy ? 'Logging out…' : 'Log out'}
+      </button>
+      {logOut.error && (
+        <p className="sidebar-note" role="alert">
+          {logOut.error}
+        </p>
       )}
     </nav>
   )

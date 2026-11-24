@@ -1,4 +1,12 @@
+import { forgetAccessToken, getAccessToken } from './auth.js'
+
 const apiUrl = import.meta.env.VITE_API_URL
+
+function failure(message, status) {
+  const error = new Error(message)
+  error.status = status
+  return error
+}
 
 async function request(method, path, body) {
   if (!apiUrl) {
@@ -7,20 +15,25 @@ async function request(method, path, body) {
 
   let response
   try {
+    const token = await getAccessToken()
+    if (!token) throw failure('Sign in to continue.', 401)
     response = await fetch(`${apiUrl}${path}`, {
       method,
-      headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
+      headers: {
+        Authorization: `Bearer ${token}`,
+        ...(body !== undefined && { 'Content-Type': 'application/json' }),
+      },
       body: body === undefined ? undefined : JSON.stringify(body),
     })
-  } catch {
-    throw new Error("Can't reach the server. Check that it is running, then try again.")
+  } catch (error) {
+    if (error.status) throw error
+    throw new Error("Can't reach the server. Check that it is running, then try again.", { cause: error })
   }
 
   const data = await response.json().catch(() => null)
+  if (response.status === 401) forgetAccessToken()
   if (!response.ok) {
-    const error = new Error(data?.error ?? `The server answered with an error (${response.status}). Try again.`)
-    error.status = response.status
-    throw error
+    throw failure(data?.error ?? `The server answered with an error (${response.status}). Try again.`, response.status)
   }
   return data
 }

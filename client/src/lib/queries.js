@@ -1,13 +1,5 @@
-import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as api from './api.js'
-
-export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: (failureCount, error) => error.status === undefined && failureCount < 2,
-    },
-  },
-})
 
 export const useMe = () => useQuery({ queryKey: ['me'], queryFn: api.getMe })
 export const useTeams = () => useQuery({ queryKey: ['teams'], queryFn: api.getTeams })

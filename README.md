@@ -11,11 +11,15 @@ A web app for tracking project work: teams, issues, projects and progress.
 
 You need Node.js 22.18 or newer.
 
-1. In `server`, copy `.env.example` to `.env` and `.env.test.example` to `.env.test`, and fill in the Neon connection details. `.env` uses the `pm_app` database and `.env.test` uses `pm_app_test`.
+1. In `server`, copy `.env.example` to `.env` and `.env.test.example` to `.env.test`, and fill in the Neon connection details and the Neon Auth URL. `.env` uses the `pm_app` database and `.env.test` uses `pm_app_test`.
 2. In `server`, run `npm install`, then `npm run db:migrate`, `npm run db:seed` and `npm run test:db:setup`.
-3. In `client`, copy `.env.example` to `.env`, then run `npm install`.
+3. In `client`, copy `.env.example` to `.env`, fill in the same Neon Auth URL, then run `npm install`.
 
-Until login is added, the server acts as the user named in `DEV_USER_EMAIL` in `server/.env`. Use `admin@example.com` for an admin, or `sam@example.com` for a member of Engineering. Restart the server after changing it.
+## Accounts and admins
+
+- Anyone can create an account on the sign-in page. A new account is a Member and is in no teams.
+- To make someone an admin, they sign in once, then you run this in `server`: `npm run make-admin -- their@email.com`.
+- Login, password reset and blocking repeated wrong passwords are handled by Neon Auth.
 
 ## Run the app
 

@@ -30,6 +30,7 @@ enum IssuePriority {
 
 model User {
   id             String       @id @default(uuid())
+  authUserId     String?      @unique
   email          String       @unique
   name           String
   role           Role         @default(MEMBER)

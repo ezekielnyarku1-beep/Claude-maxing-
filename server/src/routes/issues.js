@@ -98,7 +98,7 @@ issuesRouter.patch('/:identifier', async (request, response) => {
       })
     }
     return updated
-  })
+  }, { maxWait: 10000, timeout: 20000 })
   response.json(serializeIssue(after))
 })
 

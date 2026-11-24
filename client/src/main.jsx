@@ -8,7 +8,7 @@ import '@fontsource/geist/600.css'
 import './index.css'
 import './app.css'
 import App from './App.jsx'
-import { queryClient } from './lib/queries.js'
+import { queryClient } from './lib/queryClient.js'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

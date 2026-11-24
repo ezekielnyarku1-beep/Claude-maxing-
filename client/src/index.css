@@ -14,6 +14,8 @@
   --text-small: 12px;
   --text-page-title: 16px;
   --text-panel-title: 18px;
+  --text-auth-title: 20px;
+  --text-banner: clamp(36px, 4.2vw, 58px);
   --weight-regular: 400;
   --weight-medium: 500;
   --weight-semibold: 600;

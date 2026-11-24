@@ -16,8 +16,8 @@ async function authenticateFromTestHeader(request, response, next) {
   next()
 }
 
-export async function startServer() {
-  const server = createApp({ clientOrigin, authenticate: authenticateFromTestHeader }).listen(0)
+export async function startServer(authenticate = authenticateFromTestHeader) {
+  const server = createApp({ clientOrigin, authenticate }).listen(0)
   await once(server, 'listening')
   const baseUrl = `http://127.0.0.1:${server.address().port}`
 
