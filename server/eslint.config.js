@@ -1,11 +1,13 @@
 import js from '@eslint/js'
 import globals from 'globals'
+import { defineConfig, globalIgnores } from 'eslint/config'
 
-export default [
+export default defineConfig([
+  globalIgnores(['src/generated']),
   js.configs.recommended,
   {
     languageOptions: {
       globals: globals.node,
     },
   },
-]
+])
