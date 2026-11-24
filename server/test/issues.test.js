@@ -75,6 +75,8 @@ test('a member sees only issues of their teams, and can filter them', async () =
   assert.deepEqual(byProject.body.map(issue => issue.title), ['Eng project'])
   const hidden = await server.call('GET', '/api/issues?team=DES', { as: engMember })
   assert.deepEqual(hidden.body, [])
+  const invalidProject = await server.call('GET', '/api/issues?project=invalid', { as: engMember })
+  assert.equal(invalidProject.status, 400)
 })
 
 test('a member cannot open or change an issue of another team', async () => {
@@ -128,6 +130,21 @@ test('an empty change is refused and records nothing', async () => {
   await server.call('PATCH', '/api/issues/ENG-1', { as: engMember, body: { status: 'TODO' } })
   const detail = await server.call('GET', '/api/issues/ENG-1', { as: engMember })
   assert.equal(detail.body.activity.length, 1)
+})
+
+test('concurrent changes record each status from the previous saved value', async () => {
+  await addIssue(fixtures.eng, fixtures.engUser, { title: 'Concurrent changes', status: 'TODO' })
+  const updates = await Promise.all(['IN_PROGRESS', 'DONE'].map(status =>
+    server.call('PATCH', '/api/issues/ENG-1', { as: engMember, body: { status } }),
+  ))
+  assert.deepEqual(updates.map(update => update.status), [200, 200])
+
+  const detail = await server.call('GET', '/api/issues/ENG-1', { as: engMember })
+  const changes = detail.body.activity.filter(entry => entry.field === 'status')
+  assert.equal(changes.length, 2)
+  assert.equal(changes[0].fromValue, 'TODO')
+  assert.equal(changes[1].fromValue, changes[0].toValue)
+  assert.equal(changes[1].toValue, detail.body.status)
 })
 
 test('comments are saved with their author and shown in order', async () => {

@@ -51,6 +51,7 @@ function IssueEditor({ issue, headingLevel }) {
         className="issue-description-input"
         placeholder="Add a description…"
         rows={4}
+        maxLength={10000}
         value={description}
         onChange={event => setDescription(event.target.value)}
         onBlur={() => {

@@ -6,21 +6,26 @@ function PickerList({ label, options, value, multiple, onPick }) {
   const listRef = useRef(null)
   const selectedIndex = options.findIndex(option => (multiple ? value.includes(option.value) : option.value === value))
   const [activeIndex, setActiveIndex] = useState(Math.max(selectedIndex, 0))
+  const active = Math.min(activeIndex, Math.max(0, options.length - 1))
 
   useEffect(() => {
-    listRef.current.focus()
-  }, [])
+    listRef.current?.focus()
+  }, [options.length])
+
+  useEffect(() => {
+    document.getElementById(`${listId}-${active}`)?.scrollIntoView({ block: 'nearest' })
+  }, [listId, active])
 
   const isSelected = option => (multiple ? value.includes(option.value) : option.value === value)
 
   function moveWithKeys(event) {
-    const moves = { ArrowDown: activeIndex + 1, ArrowUp: activeIndex - 1, Home: 0, End: options.length - 1 }
+    const moves = { ArrowDown: active + 1, ArrowUp: active - 1, Home: 0, End: options.length - 1 }
     if (event.key in moves) {
       event.preventDefault()
       setActiveIndex(Math.min(Math.max(moves[event.key], 0), options.length - 1))
-    } else if ((event.key === 'Enter' || event.key === ' ') && options[activeIndex]) {
+    } else if ((event.key === 'Enter' || event.key === ' ') && options[active]) {
       event.preventDefault()
-      onPick(options[activeIndex].value)
+      onPick(options[active].value)
     }
   }
 
@@ -34,7 +39,7 @@ function PickerList({ label, options, value, multiple, onPick }) {
       tabIndex={-1}
       aria-label={label}
       aria-multiselectable={multiple || undefined}
-      aria-activedescendant={`${listId}-${activeIndex}`}
+      aria-activedescendant={`${listId}-${active}`}
       onKeyDown={moveWithKeys}
     >
       {options.map((option, index) => (
@@ -43,8 +48,10 @@ function PickerList({ label, options, value, multiple, onPick }) {
           id={`${listId}-${index}`}
           role="option"
           aria-selected={isSelected(option)}
-          className={index === activeIndex ? 'is-active' : undefined}
-          onPointerMove={() => setActiveIndex(index)}
+          className={index === active ? 'is-active' : undefined}
+          onPointerMove={event => {
+            if (event.pointerType === 'mouse') setActiveIndex(index)
+          }}
           onClick={() => onPick(option.value)}
         >
           {option.icon}

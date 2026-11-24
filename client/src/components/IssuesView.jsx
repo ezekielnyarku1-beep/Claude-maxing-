@@ -34,7 +34,7 @@ export default function IssuesView({ title, filters, teamKey, summary }) {
 
   const openIssue = identifier => setParam('issue', identifier)
   const closePanel = useCallback(() => {
-    const row = document.querySelector(`.issues-view a[href="/issue/${openIdentifier}"]`)
+    const row = document.querySelector(`.issues-view a[href="/issue/${CSS.escape(openIdentifier)}"]`)
     setParam('issue', null)
     row?.focus()
   }, [openIdentifier, setParam])

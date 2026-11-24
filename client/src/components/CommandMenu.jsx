@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import { useNavigate } from 'react-router'
 import Dialog from './Dialog.jsx'
 import { useIssues, useProjects, useTeams } from '../lib/queries.js'
@@ -34,6 +34,10 @@ export default function CommandMenu({ onClose }) {
   const matches = commands.filter(command => `${command.label} ${command.hint ?? ''}`.toLowerCase().includes(search)).slice(0, 50)
   const active = Math.min(activeIndex, Math.max(matches.length - 1, 0))
 
+  useEffect(() => {
+    document.getElementById(`${listId}-${active}`)?.scrollIntoView({ block: 'nearest' })
+  }, [listId, active])
+
   function run(command) {
     onClose()
     command.run()
@@ -42,6 +46,7 @@ export default function CommandMenu({ onClose }) {
   function moveWithKeys(event) {
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault()
+      if (!matches.length) return
       const step = event.key === 'ArrowDown' ? 1 : -1
       setActiveIndex(Math.min(Math.max(active + step, 0), matches.length - 1))
     } else if (event.key === 'Enter' && matches[active]) {
@@ -76,7 +81,9 @@ export default function CommandMenu({ onClose }) {
             role="option"
             aria-selected={index === active}
             className={index === active ? 'is-active' : undefined}
-            onPointerMove={() => setActiveIndex(index)}
+            onPointerMove={event => {
+              if (event.pointerType === 'mouse') setActiveIndex(index)
+            }}
             onClick={() => run(command)}
           >
             <span className="command-label">{command.label}</span>

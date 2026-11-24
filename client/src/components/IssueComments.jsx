@@ -10,7 +10,10 @@ export default function IssueComments({ issue }) {
   function submit(event) {
     event.preventDefault()
     if (!body.trim() || addComment.isPending) return
-    addComment.mutate(body, { onSuccess: () => setBody('') })
+    const submitted = body
+    addComment.mutate(submitted, {
+      onSuccess: () => setBody(current => current === submitted ? '' : current),
+    })
   }
 
   return (
@@ -39,6 +42,7 @@ export default function IssueComments({ issue }) {
           id={`new-comment-${issue.id}`}
           className="input"
           rows={3}
+          maxLength={5000}
           placeholder="Write a comment…"
           value={body}
           onChange={event => setBody(event.target.value)}

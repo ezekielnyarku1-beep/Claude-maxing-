@@ -13,7 +13,6 @@ import {
   serializeIssueDetail,
 } from '../serializers.js'
 import {
-  isId,
   readBody,
   readChoice,
   readIdList,
@@ -45,7 +44,7 @@ issuesRouter.get('/', async (request, response) => {
   const { team, project, assignee } = request.query
   const where = { team: visibleTeamsWhere(request.user) }
   if (typeof team === 'string') where.team.key = team
-  if (typeof project === 'string') where.projectId = isId(project) ? project : null
+  if (project !== undefined) where.projectId = readOptionalId(project, 'Project')
   if (assignee === 'me') where.assigneeId = request.user.id
   const issues = await prisma.issue.findMany({
     where,
@@ -73,11 +72,14 @@ issuesRouter.post('/', async (request, response) => {
 
 issuesRouter.patch('/:identifier', async (request, response) => {
   const body = readBody(request)
-  const before = await findVisibleIssue(request.user, request.params.identifier, issueInclude)
+  const issue = await findVisibleIssue(request.user, request.params.identifier)
   const { labelIds, ...fields } = readIssueFields(body, { creating: false })
   if (!Object.keys(fields).length && !labelIds) throw new HttpError(400, 'There is nothing to change.')
 
   const after = await prisma.$transaction(async tx => {
+    const locked = await tx.$queryRaw`SELECT id FROM "Issue" WHERE id = ${issue.id} FOR UPDATE`
+    if (!locked.length) throw new HttpError(404, 'Issue not found.')
+    const before = await tx.issue.findUnique({ where: { id: issue.id }, include: issueInclude })
     await checkIssueReferences(tx, before.teamId, { ...fields, labelIds })
     const updated = await tx.issue.update({
       where: { id: before.id },
@@ -87,7 +89,12 @@ issuesRouter.patch('/:identifier', async (request, response) => {
     const changes = describeChanges(before, updated)
     if (changes.length) {
       await tx.issueActivity.createMany({
-        data: changes.map(change => ({ ...change, issueId: before.id, actorId: request.user.id })),
+        data: changes.map(change => ({
+          ...change,
+          issueId: before.id,
+          actorId: request.user.id,
+          createdAt: updated.updatedAt,
+        })),
       })
     }
     return updated

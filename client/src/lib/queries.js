@@ -48,6 +48,9 @@ export function useCreateIssue() {
 }
 
 export function useAddComment(identifier) {
-  const refresh = useRefreshWorkData()
-  return useMutation({ mutationFn: body => api.addComment(identifier, body), onSettled: refresh })
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: body => api.addComment(identifier, body),
+    onSuccess: () => client.invalidateQueries({ queryKey: ['issue', identifier] }),
+  })
 }

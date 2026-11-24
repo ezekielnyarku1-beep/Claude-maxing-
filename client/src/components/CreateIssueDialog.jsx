@@ -58,11 +58,11 @@ function CreateIssueForm({ teams, defaultTeamKey, onClose }) {
       </div>
       <label>
         Title
-        <input className="input" value={fields.title} onChange={set('title')} maxLength={200} required data-autofocus />
+        <input className="input" value={fields.title} onChange={set('title')} maxLength={200} required autoFocus data-autofocus />
       </label>
       <label>
         Description
-        <textarea className="input" rows={4} value={fields.description} onChange={set('description')} />
+        <textarea className="input" rows={4} maxLength={10000} value={fields.description} onChange={set('description')} />
       </label>
       {createIssue.isError && (
         <p className="inline-error" role="alert">

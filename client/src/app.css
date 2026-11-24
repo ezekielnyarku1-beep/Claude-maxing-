@@ -170,28 +170,22 @@
 }
 
 .popover {
-  position: relative;
   display: inline-block;
 }
 
 .popover-panel {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  z-index: 20;
-  min-width: 200px;
-  max-height: 320px;
+  position: fixed;
+  inset: auto;
+  width: min(230px, calc(100% - 16px));
+  margin: 0;
   padding: 4px;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  color: var(--tx);
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: 0 4px 12px rgb(0 0 0 / 0.08);
-}
-
-.page-header-actions .popover-panel {
-  right: 0;
-  left: auto;
 }
 
 .picker:focus-visible {
@@ -229,7 +223,6 @@
 .filter-menu {
   display: grid;
   gap: var(--gap);
-  min-width: 220px;
   padding: var(--gap-small);
 }
 
@@ -792,6 +785,48 @@
   white-space: nowrap;
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  .popover-panel,
+  .dialog[open] {
+    animation: overlay-enter 150ms ease-out both;
+  }
+
+  .dialog[open]::backdrop {
+    animation: backdrop-enter 150ms ease-out both;
+  }
+
+  .issue-panel {
+    animation: issue-panel-enter 200ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  }
+
+  .progress-done,
+  .progress-active {
+    transition: width 220ms ease-out;
+  }
+
+  .sidebar-item,
+  .issue-row,
+  .button,
+  .icon-button {
+    transition: background-color 120ms ease-out;
+  }
+
+  @keyframes overlay-enter {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes backdrop-enter {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes issue-panel-enter {
+    from { opacity: 0; translate: 12px 0; }
+    to { opacity: 1; translate: 0 0; }
+  }
+}
+
 .project-summary {
   padding: 12px 24px;
   border-bottom: 1px solid var(--line);
@@ -839,6 +874,7 @@
 @media (max-width: 768px) {
   .shell {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
   }
 
   .sidebar {
@@ -849,7 +885,6 @@
     height: auto;
     padding: 4px var(--gap);
     overflow-x: auto;
-    scrollbar-width: none;
     background: var(--bg);
     border-right: 0;
     border-bottom: 1px solid var(--line);
@@ -871,6 +906,7 @@
   .sidebar-actions,
   .sidebar-links {
     display: flex;
+    flex: none;
     gap: 4px;
     margin: 0;
   }
@@ -904,7 +940,8 @@
     position: fixed;
     inset: 0;
     z-index: 40;
-    height: 100%;
+    height: 100dvh;
+    overscroll-behavior: contain;
     border-left: 0;
   }
 
@@ -924,7 +961,8 @@
   .board {
     grid-auto-columns: 85vw;
     padding: 12px;
-    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 12px;
+    scroll-snap-type: x proximity;
   }
 
   .board-column {
