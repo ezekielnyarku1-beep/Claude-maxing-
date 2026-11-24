@@ -1,8 +1,14 @@
 import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
+import { errorHandler, notFoundHandler } from './errors.js'
+import { issuesRouter } from './routes/issues.js'
+import { labelsRouter } from './routes/labels.js'
+import { meRouter } from './routes/me.js'
+import { projectsRouter } from './routes/projects.js'
+import { teamsRouter } from './routes/teams.js'
 
-export function createApp({ clientOrigin }) {
+export function createApp({ clientOrigin, authenticate }) {
   const app = express()
 
   app.use(helmet())
@@ -12,9 +18,15 @@ export function createApp({ clientOrigin }) {
     response.json({ status: 'ok' })
   })
 
-  app.use((request, response) => {
-    response.status(404).json({ error: 'Not found.' })
-  })
+  app.use('/api', express.json({ limit: '100kb' }), authenticate)
+  app.use('/api/me', meRouter)
+  app.use('/api/teams', teamsRouter)
+  app.use('/api/projects', projectsRouter)
+  app.use('/api/issues', issuesRouter)
+  app.use('/api/labels', labelsRouter)
+
+  app.use(notFoundHandler)
+  app.use(errorHandler)
 
   return app
 }

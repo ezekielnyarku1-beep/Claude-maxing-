@@ -9,7 +9,8 @@
   "scripts": {
     "dev": "node --watch --env-file-if-exists=.env src/index.js",
     "start": "node --env-file-if-exists=.env src/index.js",
-    "test": "node --env-file-if-exists=.env --test",
+    "test": "node --env-file=.env.test --test --test-concurrency=1",
+    "test:db:setup": "node --env-file=.env.test node_modules/prisma/build/index.js migrate deploy",
     "lint": "eslint .",
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate dev && prisma generate",

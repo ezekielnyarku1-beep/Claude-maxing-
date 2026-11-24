@@ -39,6 +39,7 @@ model User {
   ownedProjects  Project[]
   assignedIssues Issue[]
   comments       Comment[]
+  activities     IssueActivity[]
 }
 
 model Team {
@@ -99,6 +100,7 @@ model Issue {
   project     Project?      @relation(fields: [projectId], references: [id], onDelete: SetNull)
   labels      Label[]
   comments    Comment[]
+  activities  IssueActivity[]
 
   @@unique([teamId, number])
   @@index([assigneeId])
@@ -121,6 +123,20 @@ model Comment {
   updatedAt DateTime @updatedAt
   issue     Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
   author    User     @relation(fields: [authorId], references: [id])
+
+  @@index([issueId])
+}
+
+model IssueActivity {
+  id        String   @id @default(uuid())
+  issueId   String
+  actorId   String
+  field     String?
+  fromValue String?
+  toValue   String?
+  createdAt DateTime @default(now())
+  issue     Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  actor     User     @relation(fields: [actorId], references: [id])
 
   @@index([issueId])
 }

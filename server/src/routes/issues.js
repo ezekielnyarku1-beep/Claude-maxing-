@@ -1,0 +1,106 @@
+import { Router } from 'express'
+import { prisma } from '../db.js'
+import { findVisibleIssue, findVisibleTeam, visibleTeamsWhere } from '../access.js'
+import { HttpError } from '../errors.js'
+import { IssuePriority, IssueStatus } from '../generated/prisma/enums.ts'
+import { checkIssueReferences, createIssue, describeChanges } from '../issues.js'
+import {
+  issueDetailInclude,
+  issueInclude,
+  personSelect,
+  serializeComment,
+  serializeIssue,
+  serializeIssueDetail,
+} from '../serializers.js'
+import {
+  isId,
+  readBody,
+  readChoice,
+  readIdList,
+  readOptionalDate,
+  readOptionalId,
+  readTeamKey,
+  readText,
+} from '../validation.js'
+
+export const issuesRouter = Router()
+
+const statuses = Object.values(IssueStatus)
+const priorities = Object.values(IssuePriority)
+
+function readIssueFields(body, { creating }) {
+  const fields = {}
+  if (creating || 'title' in body) fields.title = readText(body.title, 'Title', { max: 200 })
+  if (creating || 'status' in body) fields.status = readChoice(body.status, 'Status', statuses)
+  if ('description' in body) fields.description = readText(body.description, 'Description', { max: 10000, allowEmpty: true })
+  if ('priority' in body) fields.priority = readChoice(body.priority, 'Priority', priorities)
+  if ('assigneeId' in body) fields.assigneeId = readOptionalId(body.assigneeId, 'Assignee')
+  if ('projectId' in body) fields.projectId = readOptionalId(body.projectId, 'Project')
+  if ('dueDate' in body) fields.dueDate = readOptionalDate(body.dueDate, 'Due date')
+  if ('labelIds' in body) fields.labelIds = readIdList(body.labelIds, 'Labels')
+  return fields
+}
+
+issuesRouter.get('/', async (request, response) => {
+  const { team, project, assignee } = request.query
+  const where = { team: visibleTeamsWhere(request.user) }
+  if (typeof team === 'string') where.team.key = team
+  if (typeof project === 'string') where.projectId = isId(project) ? project : null
+  if (assignee === 'me') where.assigneeId = request.user.id
+  const issues = await prisma.issue.findMany({
+    where,
+    include: issueInclude,
+    orderBy: [{ status: 'asc' }, { number: 'desc' }],
+  })
+  response.json(issues.map(serializeIssue))
+})
+
+issuesRouter.get('/:identifier', async (request, response) => {
+  const issue = await findVisibleIssue(request.user, request.params.identifier, issueDetailInclude)
+  response.json(serializeIssueDetail(issue))
+})
+
+issuesRouter.post('/', async (request, response) => {
+  const body = readBody(request)
+  const team = await findVisibleTeam(request.user, readTeamKey(body.teamKey))
+  const fields = readIssueFields(body, { creating: true })
+  const issue = await prisma.$transaction(async tx => {
+    await checkIssueReferences(tx, team.id, fields)
+    return createIssue(tx, { ...fields, teamId: team.id, actorId: request.user.id }, issueInclude)
+  })
+  response.status(201).json(serializeIssue(issue))
+})
+
+issuesRouter.patch('/:identifier', async (request, response) => {
+  const body = readBody(request)
+  const before = await findVisibleIssue(request.user, request.params.identifier, issueInclude)
+  const { labelIds, ...fields } = readIssueFields(body, { creating: false })
+  if (!Object.keys(fields).length && !labelIds) throw new HttpError(400, 'There is nothing to change.')
+
+  const after = await prisma.$transaction(async tx => {
+    await checkIssueReferences(tx, before.teamId, { ...fields, labelIds })
+    const updated = await tx.issue.update({
+      where: { id: before.id },
+      data: { ...fields, ...(labelIds && { labels: { set: labelIds.map(id => ({ id })) } }) },
+      include: issueInclude,
+    })
+    const changes = describeChanges(before, updated)
+    if (changes.length) {
+      await tx.issueActivity.createMany({
+        data: changes.map(change => ({ ...change, issueId: before.id, actorId: request.user.id })),
+      })
+    }
+    return updated
+  })
+  response.json(serializeIssue(after))
+})
+
+issuesRouter.post('/:identifier/comments', async (request, response) => {
+  const body = readBody(request)
+  const issue = await findVisibleIssue(request.user, request.params.identifier)
+  const comment = await prisma.comment.create({
+    data: { issueId: issue.id, authorId: request.user.id, body: readText(body.body, 'Comment', { max: 5000 }) },
+    include: { author: personSelect },
+  })
+  response.status(201).json(serializeComment(comment))
+})

@@ -26,6 +26,7 @@ test('the database is reachable and has every table', async () => {
     prisma.issue.count(),
     prisma.label.count(),
     prisma.comment.count(),
+    prisma.issueActivity.count(),
   ])
   for (const count of counts) assert.equal(typeof count, 'number')
 })

@@ -1,4 +1,5 @@
 import { prisma } from '../src/db.js'
+import { createIssue } from '../src/issues.js'
 
 const users = [
   { email: 'admin@example.com', name: 'Alex Admin', role: 'ADMIN' },
@@ -88,22 +89,16 @@ async function seed() {
 
     const issueIds = {}
     for (const issue of issues) {
-      const team = await tx.team.update({
-        where: { id: teamIds[issue.team] },
-        data: { nextIssueNumber: { increment: 1 } },
-      })
-      const created = await tx.issue.create({
-        data: {
-          teamId: team.id,
-          number: team.nextIssueNumber - 1,
-          title: issue.title,
-          status: issue.status,
-          priority: issue.priority,
-          assigneeId: issue.assignee && userIds[issue.assignee],
-          projectId: issue.project && projectIds[issue.project],
-          dueDate: toDate(issue.dueDate),
-          labels: { connect: issue.labels.map(name => ({ id: labelIds[name] })) },
-        },
+      const created = await createIssue(tx, {
+        teamId: teamIds[issue.team],
+        actorId: userIds['admin@example.com'],
+        title: issue.title,
+        status: issue.status,
+        priority: issue.priority,
+        assigneeId: issue.assignee && userIds[issue.assignee],
+        projectId: issue.project && projectIds[issue.project],
+        dueDate: toDate(issue.dueDate),
+        labelIds: issue.labels.map(name => labelIds[name]),
       })
       issueIds[issue.title] = created.id
     }
