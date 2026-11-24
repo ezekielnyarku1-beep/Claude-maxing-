@@ -1,0 +1,73 @@
+.server-status {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 64px 24px;
+}
+
+.server-status h1 {
+  margin: 0;
+  font-size: var(--text-page-title);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-title);
+}
+
+.server-status-intro {
+  margin: 0 0 24px;
+  font-size: var(--text-small);
+  color: var(--mut);
+}
+
+.server-status-message {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+  margin: 0;
+  padding: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.server-status-message::before {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mut);
+}
+
+.server-status-message.is-success::before {
+  background: var(--acc);
+}
+
+.server-status-message.is-error::before {
+  background: var(--danger);
+}
+
+.server-status button {
+  min-height: var(--control-height);
+  margin-top: var(--gap);
+  padding: 0 12px;
+  color: var(--tx);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+}
+
+.server-status button:hover:not(:disabled) {
+  background: var(--hover);
+}
+
+.server-status button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+@media (max-width: 640px) {
+  .server-status button {
+    min-height: var(--tap-target);
+  }
+}
