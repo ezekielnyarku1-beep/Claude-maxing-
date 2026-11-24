@@ -1,0 +1,98 @@
+import { useState } from 'react'
+import Dialog from './Dialog.jsx'
+import QueryState from './QueryState.jsx'
+import { priorities, statuses } from '../lib/issueOptions.js'
+import { useCreateIssue, useTeams } from '../lib/queries.js'
+
+function CreateIssueForm({ teams, defaultTeamKey, onClose }) {
+  const createIssue = useCreateIssue()
+  const [fields, setFields] = useState({
+    teamKey: teams.some(team => team.key === defaultTeamKey) ? defaultTeamKey : teams[0].key,
+    title: '',
+    description: '',
+    status: 'TODO',
+    priority: 'NO_PRIORITY',
+  })
+  const set = name => event => setFields(current => ({ ...current, [name]: event.target.value }))
+
+  function submit(event) {
+    event.preventDefault()
+    if (!fields.title.trim() || createIssue.isPending) return
+    createIssue.mutate(fields, { onSuccess: onClose })
+  }
+
+  return (
+    <form className="create-issue" onSubmit={submit}>
+      <h2>New issue</h2>
+      <div className="create-issue-row">
+        <label>
+          Team
+          <select className="input" value={fields.teamKey} onChange={set('teamKey')}>
+            {teams.map(team => (
+              <option key={team.key} value={team.key}>
+                {team.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Status
+          <select className="input" value={fields.status} onChange={set('status')}>
+            {statuses.map(status => (
+              <option key={status.value} value={status.value}>
+                {status.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Priority
+          <select className="input" value={fields.priority} onChange={set('priority')}>
+            {priorities.map(priority => (
+              <option key={priority.value} value={priority.value}>
+                {priority.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <label>
+        Title
+        <input className="input" value={fields.title} onChange={set('title')} maxLength={200} required data-autofocus />
+      </label>
+      <label>
+        Description
+        <textarea className="input" rows={4} value={fields.description} onChange={set('description')} />
+      </label>
+      {createIssue.isError && (
+        <p className="inline-error" role="alert">
+          The issue was not created: {createIssue.error.message}
+        </p>
+      )}
+      <div className="dialog-actions">
+        <button type="button" className="button" onClick={onClose}>
+          Cancel
+        </button>
+        <button type="submit" className="button is-primary" disabled={!fields.title.trim() || createIssue.isPending}>
+          {createIssue.isPending ? 'Creating…' : 'Create issue'}
+        </button>
+      </div>
+    </form>
+  )
+}
+
+export default function CreateIssueDialog({ defaultTeamKey, onClose }) {
+  const teams = useTeams()
+  return (
+    <Dialog label="New issue" className="is-form" onClose={onClose}>
+      <QueryState query={teams} label="teams">
+        {data =>
+          data.length ? (
+            <CreateIssueForm teams={data} defaultTeamKey={defaultTeamKey} onClose={onClose} />
+          ) : (
+            <p className="empty-state">You are not in any team yet, so you cannot create issues.</p>
+          )}
+      </QueryState>
+    </Dialog>
+  )
+}
