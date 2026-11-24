@@ -3,12 +3,25 @@ import { resolve } from 'node:path'
 import express from 'express'
 import { toNodeHandler } from 'better-auth/node'
 import { createServer as createViteServer } from 'vite'
-import { auth, pool } from './server/auth.mjs'
+import { auth, isPasswordResetConfigured, pool } from './server/auth.mjs'
 
 const app = express()
 const httpServer = createServer(app)
 const isProduction = process.argv.includes('--production') || process.env.NODE_ENV === 'production'
 let vite
+
+app.get('/api/app-config', (_request, response) => {
+  response.json({ passwordResetEnabled: isPasswordResetConfigured })
+})
+
+app.post('/api/auth/request-password-reset', (_request, response, next) => {
+  if (isPasswordResetConfigured) {
+    next()
+    return
+  }
+
+  response.status(503).json({ error: 'Password reset email is not configured.' })
+})
 
 app.all('/api/auth/*splat', toNodeHandler(auth))
 

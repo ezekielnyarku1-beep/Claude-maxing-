@@ -10,17 +10,34 @@ function Loading() {
   return <div className="loading" role="status" aria-label="Loading" />
 }
 
+function SessionUnavailable() {
+  const { sessionError, retrySession } = useAuth()
+  return (
+    <main className="login">
+      <section className="workspace">
+        <div className="login-content">
+          <h1>Can't reach your workspace</h1>
+          <p className="welcome" role="alert">{sessionError}</p>
+          <button className="submit" type="button" onClick={retrySession}>Try again</button>
+        </div>
+      </section>
+    </main>
+  )
+}
+
 function RequireAuth({ children }) {
-  const { user } = useAuth()
+  const { user, sessionError } = useAuth()
   const location = useLocation()
   if (user === undefined) return <Loading />
+  if (sessionError) return <SessionUnavailable />
   if (!user) return <Navigate to="/" replace state={{ from: location.pathname }} />
   return children
 }
 
 function GuestOnly({ children }) {
-  const { user } = useAuth()
+  const { user, sessionError } = useAuth()
   if (user === undefined) return <Loading />
+  if (sessionError) return <SessionUnavailable />
   if (user) return <Navigate to="/dashboard" replace />
   return children
 }

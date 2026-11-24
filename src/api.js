@@ -34,12 +34,21 @@ export async function api(path, body) {
       case 'logout':
         unwrap(await authClient.signOut())
         return {}
-      case 'forgot-password':
+      case 'forgot-password': {
+        const configResponse = await fetch('/api/app-config')
+        if (!configResponse.ok) {
+          throw new ApiError('Unable to check password-reset availability.', configResponse.status)
+        }
+        const config = await configResponse.json()
+        if (!config.passwordResetEnabled) {
+          throw new ApiError('Password reset email is not configured. Set the SMTP variables.', 503)
+        }
         unwrap(await authClient.requestPasswordReset({
           email: body.email,
           redirectTo: `${window.location.origin}/reset-password`,
         }))
         return { message: 'If that email is registered, reset instructions have been sent.' }
+      }
       case 'reset-password':
         unwrap(await authClient.resetPassword({
           token: body.token,

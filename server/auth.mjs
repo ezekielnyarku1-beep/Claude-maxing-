@@ -32,6 +32,12 @@ export const pool = new Pool({
   max: 5,
 })
 
+pool.on('error', error => {
+  console.error('Unexpected Postgres pool error:', error.message)
+})
+
+export const isPasswordResetConfigured = Boolean(mailer)
+
 export const auth = betterAuth({
   database: pool,
   baseURL,
@@ -44,11 +50,13 @@ export const auth = betterAuth({
         throw new Error('Password reset email is not configured. Set the SMTP variables.')
       }
 
-      await mailer.sendMail({
+      void mailer.sendMail({
         from: process.env.SMTP_FROM,
         to: user.email,
         subject: 'Reset your Overview Teams password',
         text: `Use this link to reset your password: ${url}`,
+      }).catch(error => {
+        console.error('Failed to send password reset email:', error.message)
       })
     },
   },

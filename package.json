@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint src",
     "db:migrate": "node --env-file=.env.local scripts/migrate.mjs",
-    "start": "node --env-file=.env.local server.mjs --production"
+    "start": "node scripts/start.mjs"
   },
   "keywords": [],
   "author": "",

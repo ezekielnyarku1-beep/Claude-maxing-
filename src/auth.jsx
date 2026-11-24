@@ -6,24 +6,51 @@ const AuthContext = createContext(null)
 export function AuthProvider({ children }) {
   // undefined while we ask the server, then a user object or null.
   const [user, setUser] = useState(undefined)
+  const [sessionError, setSessionError] = useState('')
+  const [sessionAttempt, setSessionAttempt] = useState(0)
 
   useEffect(() => {
-    api('me').then(data => setUser(data.user), () => setUser(null))
-  }, [])
+    let active = true
+    setSessionError('')
+    api('me').then(
+      data => {
+        if (active) setUser(data.user)
+      },
+      error => {
+        if (active) {
+          setUser(null)
+          setSessionError(error.message || "Can't restore your session right now.")
+        }
+      },
+    )
+    return () => {
+      active = false
+    }
+  }, [sessionAttempt])
 
   const value = useMemo(() => ({
     user,
+    sessionError,
+    retrySession() {
+      setUser(undefined)
+      setSessionError('')
+      setSessionAttempt(attempt => attempt + 1)
+    },
     async login(email, password) {
-      setUser((await api('login', { email, password })).user)
+      const { user: signedInUser } = await api('login', { email, password })
+      setSessionError('')
+      setUser(signedInUser)
     },
     async register(name, email, password) {
-      setUser((await api('register', { name, email, password })).user)
+      const { user: registeredUser } = await api('register', { name, email, password })
+      setSessionError('')
+      setUser(registeredUser)
     },
     async logout() {
       await api('logout', {})
       setUser(null)
     },
-  }), [user])
+  }), [user, sessionError])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
