@@ -1,0 +1,32 @@
+{
+  "name": "client",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node --env-file=.env.local dev.mjs",
+    "build": "vite build",
+    "lint": "eslint src",
+    "db:migrate": "node --env-file=.env.local scripts/migrate.mjs",
+    "start": "node --env-file=.env.local server.mjs --production"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@fontsource/poppins": "^5.3.0",
+    "better-auth": "^1.7.28",
+    "express": "^5.3.0",
+    "nodemailer": "^10.6.1",
+    "pg": "^8.23.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router-dom": "^7.18.7"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.5",
+    "eslint-plugin-react": "^7.37.5",
+    "vite": "^7.3.8"
+  }
+}
