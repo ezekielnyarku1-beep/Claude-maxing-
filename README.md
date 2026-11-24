@@ -8,7 +8,7 @@ Overview Teams uses React/Vite for the UI, Better Auth for email/password authen
 2. Copy `.env.example` to `.env.local`.
 3. Set `DATABASE_URL` to Neon's pooled connection string and `DATABASE_URL_UNPOOLED` to its direct connection string. Set a random `BETTER_AUTH_SECRET` with at least 32 characters.
 4. Run `npm run db:migrate` to create or update Better Auth tables.
-5. Run `npm run dev` and open `http://127.0.0.1:5175`.
+5. Run `npm run dev` and open `http://localhost:5173`.
 
 The migration command uses the direct URL; the running app uses the pooled URL. Password-reset emails require SMTP settings in `.env.local`. The UI reports an error if SMTP is not configured rather than claiming an email was sent.
 

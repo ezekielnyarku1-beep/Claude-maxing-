@@ -4,7 +4,7 @@ import { Pool } from 'pg'
 
 const databaseUrl = process.env.DATABASE_URL
 const secret = process.env.BETTER_AUTH_SECRET
-const baseURL = process.env.BETTER_AUTH_URL ?? 'http://127.0.0.1:5175'
+const baseURL = process.env.BETTER_AUTH_URL ?? 'http://localhost:5173'
 const smtpPort = Number(process.env.SMTP_PORT ?? 587)
 const mailer = process.env.SMTP_HOST && process.env.SMTP_USER
   && process.env.SMTP_PASSWORD && process.env.SMTP_FROM

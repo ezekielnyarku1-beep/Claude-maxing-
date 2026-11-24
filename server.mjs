@@ -34,7 +34,7 @@ if (isProduction) {
   app.use(vite.middlewares)
 }
 
-const port = Number(process.env.PORT ?? 5175)
+const port = Number(process.env.PORT ?? 5173)
 const host = process.env.HOST ?? '127.0.0.1'
 
 httpServer.listen(port, host, () => {
