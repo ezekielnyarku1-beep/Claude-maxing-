@@ -89,3 +89,12 @@ test('removing someone who is not in the team, or an admin, keeps their views', 
   assert.equal(removed.status, 200)
   assert.equal(await prisma.savedView.count({ where: { ownerId: fixtures.adminUser.id } }), 1)
 })
+
+test('making an admin a member deletes their views for teams they are not in', async () => {
+  await save(admin, { name: 'Design view', teamKey: 'DES', filter })
+  await save(admin, { name: 'All teams', teamKey: null, filter })
+  await prisma.user.create({ data: { email: 'second-admin@test.example', name: 'Second Admin', role: 'ADMIN' } })
+  const demoted = await server.call('PATCH', `/api/users/${fixtures.adminUser.id}`, { as: 'second-admin@test.example', body: { role: 'MEMBER' } })
+  assert.equal(demoted.status, 200)
+  assert.deepEqual(await prisma.savedView.findMany({ where: { ownerId: fixtures.adminUser.id }, select: { name: true } }), [{ name: 'All teams' }])
+})

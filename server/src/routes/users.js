@@ -27,6 +27,9 @@ usersRouter.patch('/:id', async (request, response) => {
     if (user.role === 'ADMIN' && role === 'MEMBER' && admins.length <= 1) {
       throw new HttpError(400, 'There must be at least one admin.')
     }
+    if (role === 'MEMBER') {
+      await tx.savedView.deleteMany({ where: { ownerId: user.id, team: { is: { members: { none: { userId: user.id } } } } } })
+    }
     return tx.user.update({ where: { id: user.id }, data: { role }, include: userInclude })
   }, { maxWait: 10000, timeout: 20000 })
   response.json(serializeWithTeams(updated))

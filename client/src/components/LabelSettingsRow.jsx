@@ -14,26 +14,32 @@ export default function LabelSettingsRow({ label }) {
 
   return (
     <li>
-      <form className="settings-row" onSubmit={submit}>
-        <label htmlFor={`label-color-${label.id}`} className="visually-hidden">
-          Color of {label.name}
-        </label>
-        <input id={`label-color-${label.id}`} type="color" className="color-input" value={color} onChange={event => setColor(event.target.value)} />
-        <label htmlFor={`label-name-${label.id}`} className="visually-hidden">
-          Name of {label.name}
-        </label>
-        <input
-          id={`label-name-${label.id}`}
-          className="input settings-row-main"
-          value={name}
-          maxLength={40}
-          onChange={event => setName(event.target.value)}
-        />
-        <button type="submit" className="button" disabled={!changed || !name.trim() || update.isPending}>
-          Save
-        </button>
+      <form className="settings-row settings-pair" onSubmit={submit}>
+        <div className="settings-row-main">
+          <strong>{label.name}</strong>
+          <span className="settings-description">Label name and color</span>
+        </div>
+        <div className="settings-inline">
+          <label htmlFor={`label-color-${label.id}`} className="visually-hidden">
+            Color of {label.name}
+          </label>
+          <input id={`label-color-${label.id}`} type="color" className="color-input" value={color} onChange={event => setColor(event.target.value)} />
+          <label htmlFor={`label-name-${label.id}`} className="visually-hidden">
+            Name of {label.name}
+          </label>
+          <input
+            id={`label-name-${label.id}`}
+            className="input settings-row-main"
+            value={name}
+            maxLength={40}
+            onChange={event => setName(event.target.value)}
+          />
+          <button type="submit" className="button" disabled={!changed || !name.trim() || update.isPending}>
+            Save
+          </button>
+        </div>
       </form>
-      {update.isError && <p className="inline-error" role="alert">{update.error.message}</p>}
+      {update.isError && <p className="settings-feedback inline-error" role="alert">{update.error.message}</p>}
     </li>
   )
 }

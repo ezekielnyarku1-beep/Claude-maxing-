@@ -37,6 +37,7 @@ export default function SignUpPage({ onGoogle }) {
 
   return (
     <AuthLayout
+      serifHeadline
       title="Create your account"
       subtitle="Join your team on Overview Teams."
       footer={

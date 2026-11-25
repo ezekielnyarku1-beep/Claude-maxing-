@@ -11,15 +11,15 @@
   --google-stroke: light-dark(#747775, #8e918f);
   --google-text: light-dark(#1f1f1f, #e3e3e3);
 
-  --font-sans: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-serif: Georgia, "Times New Roman", serif;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   --text-base: 13px;
-  --line-base: 20px;
+  --line-base: 1.5;
   --text-small: 12px;
-  --text-page-title: 16px;
-  --text-panel-title: 18px;
-  --text-auth-title: 20px;
-  --text-auth-body: 14px;
+  --text-section-title: 14px;
+  --text-page-title: 20px;
+  --text-panel-title: var(--text-page-title);
+  --text-auth-title: var(--text-page-title);
+  --text-auth-body: var(--text-base);
   --text-auth-input: 16px;
   --text-banner: clamp(36px, 4.2vw, 58px);
   --text-google: 14px;
@@ -80,7 +80,18 @@ input,
 select,
 textarea {
   font: inherit;
+  font-family: inherit;
   color: inherit;
+}
+
+button,
+select {
+  font-weight: var(--weight-medium);
+}
+
+strong,
+b {
+  font-weight: var(--weight-semibold);
 }
 
 a {
@@ -95,8 +106,28 @@ h4,
 h5,
 h6 {
   margin: 0;
-  font-family: var(--font-serif);
+  font-weight: var(--weight-medium);
   letter-spacing: var(--tracking-title);
+}
+
+h1 {
+  font-size: var(--text-page-title);
+}
+
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: var(--text-section-title);
+}
+
+table,
+time,
+input[type="date"],
+input[type="datetime-local"],
+input[type="number"] {
+  font-variant-numeric: tabular-nums;
 }
 
 ul,
@@ -162,7 +193,6 @@ kbd {
 .property-button {
   background: transparent;
   border-color: transparent;
-  font-weight: var(--weight-regular);
 }
 
 .button:hover:not(:disabled),

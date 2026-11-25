@@ -22,39 +22,51 @@ export default function TeamsSettingsPage() {
   }
 
   return (
-    <section className="settings-section" aria-labelledby="teams-heading">
-      <h2 id="teams-heading">Teams</h2>
-      <form className="settings-form" onSubmit={submit}>
-        <h3>New team</h3>
-        <div className="settings-inline">
-          <label className="settings-field">
-            Key
-            <input className="input settings-key" value={key} maxLength={10} placeholder="ENG" onChange={event => setKey(event.target.value.toUpperCase())} />
-          </label>
-          <label className="settings-field settings-grow">
-            Name
-            <input className="input" value={name} maxLength={60} placeholder="Engineering" onChange={event => setName(event.target.value)} />
-          </label>
-          <button type="submit" className="button is-primary" disabled={!key.trim() || !name.trim() || createTeam.isPending}>
-            {createTeam.isPending ? 'Creating…' : 'Create team'}
-          </button>
-        </div>
-        <p className="muted">The key starts issue IDs, like ENG-12. It cannot be changed later.</p>
-        {createTeam.isError && <p className="inline-error" role="alert">{createTeam.error.message}</p>}
-      </form>
-      <QueryState query={users} label="users">
-        {userList => (
-          <QueryState query={teams} label="teams">
-            {teamList => (
-              <div className="settings-cards">
-                {teamList.map(team => (
-                  <TeamSettingsCard key={team.key} team={team} users={userList} />
-                ))}
-              </div>
-            )}
-          </QueryState>
-        )}
-      </QueryState>
-    </section>
+    <>
+      <h1>Teams</h1>
+      <section className="settings-section" aria-labelledby="new-team-heading">
+        <h2 id="new-team-heading">New team</h2>
+        <form className="settings-card settings-form" onSubmit={submit}>
+          <div className="settings-row settings-pair">
+            <div className="settings-row-main">
+              <strong>Team details</strong>
+              <span className="settings-description">The key starts issue IDs, like ENG-12, and cannot be changed later.</span>
+            </div>
+            <div className="settings-inline">
+              <label className="settings-field">
+                Key
+                <input className="input settings-key" value={key} maxLength={10} placeholder="ENG" onChange={event => setKey(event.target.value.toUpperCase())} />
+              </label>
+              <label className="settings-field settings-grow">
+                Name
+                <input className="input" value={name} maxLength={60} placeholder="Engineering" onChange={event => setName(event.target.value)} />
+              </label>
+              <button type="submit" className="button is-primary" disabled={!key.trim() || !name.trim() || createTeam.isPending}>
+                {createTeam.isPending ? 'Creating…' : 'Create team'}
+              </button>
+            </div>
+          </div>
+          {createTeam.isError && <p className="settings-feedback inline-error" role="alert">{createTeam.error.message}</p>}
+        </form>
+      </section>
+      <section className="settings-section" aria-labelledby="teams-heading">
+        <h2 id="teams-heading">Workspace teams</h2>
+        <QueryState query={users} label="users">
+          {userList => (
+            <QueryState query={teams} label="teams">
+              {teamList => (
+                teamList.length === 0 ? <p className="muted">No teams yet.</p> : (
+                  <div className="settings-cards">
+                    {teamList.map(team => (
+                      <TeamSettingsCard key={team.key} team={team} users={userList} />
+                    ))}
+                  </div>
+                )
+              )}
+            </QueryState>
+          )}
+        </QueryState>
+      </section>
+    </>
   )
 }

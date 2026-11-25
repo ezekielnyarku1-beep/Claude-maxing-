@@ -182,3 +182,9 @@ test('descriptions keep their indentation but not trailing spaces', async () => 
   const blank = await server.call('PATCH', path, { as: engMember, body: { description: '   ' } })
   assert.equal(blank.body.description, '')
 })
+
+test('blank lines at the start of a description are removed, indentation is kept', async () => {
+  const issue = await addIssue(fixtures.eng, fixtures.engUser, { title: 'Blank lines', status: 'TODO' })
+  const saved = await server.call('PATCH', `/api/issues/ENG-${issue.number}`, { as: engMember, body: { description: '\n \n\n    code' } })
+  assert.equal(saved.body.description, '    code')
+})

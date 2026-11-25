@@ -70,7 +70,7 @@
 }
 
 .hero-name {
-  font-size: var(--text-page-title);
+  font-size: var(--text-section-title);
   font-weight: var(--weight-semibold);
   letter-spacing: var(--tracking-title);
 }
@@ -88,11 +88,14 @@
 .hero-headline {
   max-width: 14ch;
   margin: 0;
-  font-family: var(--font-serif);
   font-size: var(--text-banner);
   line-height: 1.1;
   font-weight: var(--weight-semibold);
   letter-spacing: var(--tracking-title);
+}
+
+.hero-headline.is-serif {
+  font-family: "Anthropic Serif", "AnthropicSerif", Georgia, "Times New Roman", serif;
 }
 
 .hero-headline em {
@@ -149,7 +152,7 @@
   margin: 0;
   font-size: var(--text-auth-title);
   line-height: 28px;
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-medium);
   letter-spacing: var(--tracking-title);
   text-wrap: balance;
 }
@@ -157,7 +160,7 @@
 .auth-sub {
   margin: 1rem 0 2rem;
   color: var(--auth-muted);
-  font-size: var(--text-auth-body);
+  font-size: var(--text-small);
   line-height: 1.65;
 }
 
@@ -174,7 +177,7 @@
 
 .auth .field label {
   font-size: var(--text-auth-body);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-medium);
 }
 
 .auth .field-top {
@@ -188,7 +191,7 @@
 .auth-foot a,
 .auth-resend .link-button {
   color: var(--acc);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-medium);
   text-decoration: underline;
   text-underline-offset: .2em;
 }
@@ -214,6 +217,7 @@
 .auth-resend {
   margin: 0;
   color: var(--auth-muted);
+  font-size: var(--text-small);
 }
 
 .auth .password-input {
@@ -245,8 +249,7 @@
   width: 100%;
   min-height: 3rem;
   border-radius: .55rem;
-  font-size: var(--text-auth-input);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-medium);
 }
 
 .auth-divider {

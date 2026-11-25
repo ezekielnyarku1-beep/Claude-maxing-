@@ -4,6 +4,7 @@ const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{1
 const datePattern = /^\d{4}-\d{2}-\d{2}$/
 const teamKeyPattern = /^[A-Z][A-Z0-9]{1,9}$/
 const colorPattern = /^#[0-9a-f]{6}$/i
+const leadingBlankLines = /^(?:[ \t]*\r?\n)+/
 
 export function readBody(request) {
   const body = request.body
@@ -17,7 +18,7 @@ export function readText(value, label, { max, allowEmpty = false, keepSpaces = f
   if (typeof value !== 'string') throw new HttpError(400, `${label} must be text.`)
   const trimmed = value.trim()
   if (!allowEmpty && !trimmed) throw new HttpError(400, `${label} cannot be empty.`)
-  const text = keepSpaces && trimmed ? value.trimEnd() : trimmed
+  const text = keepSpaces && trimmed ? value.replace(leadingBlankLines, '').trimEnd() : trimmed
   if (text.length > max) throw new HttpError(400, `${label} can be at most ${max} characters.`)
   return text
 }

@@ -12,16 +12,21 @@ function WorkspaceForm({ currentName }) {
   }
 
   return (
-    <form className="settings-form" onSubmit={submit}>
-      <label htmlFor="workspace-name">Workspace name</label>
-      <div className="settings-inline">
-        <input id="workspace-name" className="input" value={name} maxLength={60} onChange={event => setName(event.target.value)} />
-        <button type="submit" className="button is-primary" disabled={save.isPending || !name.trim() || name.trim() === currentName}>
-          {save.isPending ? 'Saving…' : 'Save'}
-        </button>
+    <form className="settings-card settings-form" onSubmit={submit}>
+      <div className="settings-row settings-pair">
+        <div className="settings-row-main">
+          <label htmlFor="workspace-name" className="settings-row-title">Workspace name</label>
+          <span className="settings-description" id="workspace-name-description">Shown to everyone in the workspace.</span>
+        </div>
+        <div className="settings-inline">
+          <input id="workspace-name" aria-describedby="workspace-name-description" className="input" value={name} maxLength={60} onChange={event => setName(event.target.value)} />
+          <button type="submit" className="button is-primary" disabled={save.isPending || !name.trim() || name.trim() === currentName}>
+            {save.isPending ? 'Saving…' : 'Save'}
+          </button>
+        </div>
       </div>
-      {save.isError && <p className="inline-error" role="alert">{save.error.message}</p>}
-      {save.isSuccess && <p className="muted" role="status">Saved.</p>}
+      {save.isError && <p className="settings-feedback inline-error" role="alert">{save.error.message}</p>}
+      {save.isSuccess && <p className="settings-feedback muted" role="status">Saved.</p>}
     </form>
   )
 }
@@ -29,11 +34,14 @@ function WorkspaceForm({ currentName }) {
 export default function WorkspaceSettingsPage() {
   const workspace = useWorkspace()
   return (
-    <section className="settings-section" aria-labelledby="workspace-heading">
-      <h2 id="workspace-heading">Workspace</h2>
-      <QueryState query={workspace} label="the workspace">
-        {data => <WorkspaceForm key={data.name} currentName={data.name} />}
-      </QueryState>
-    </section>
+    <>
+      <h1>Workspace</h1>
+      <section className="settings-section" aria-labelledby="workspace-heading">
+        <h2 id="workspace-heading">General</h2>
+        <QueryState query={workspace} label="the workspace">
+          {data => <WorkspaceForm key={data.name} currentName={data.name} />}
+        </QueryState>
+      </section>
+    </>
   )
 }

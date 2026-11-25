@@ -35,6 +35,7 @@ export default function LoginPage({ onGoogle }) {
 
   return (
     <AuthLayout
+      serifHeadline
       title="Log in to your workspace"
       subtitle="Welcome back. Pick up where your team left off."
       footer={
