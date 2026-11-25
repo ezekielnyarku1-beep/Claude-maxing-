@@ -39,9 +39,9 @@ export function readOptionalId(value, label) {
   return value === null ? null : readId(value, label)
 }
 
-export function readIdList(value, label) {
-  if (!Array.isArray(value) || value.length > 20 || !value.every(isId)) {
-    throw new HttpError(400, `${label} must be a list of up to 20 valid IDs.`)
+export function readIdList(value, label, { max = 20 } = {}) {
+  if (!Array.isArray(value) || value.length > max || !value.every(isId)) {
+    throw new HttpError(400, `${label} must be a list of up to ${max} valid IDs.`)
   }
   return [...new Set(value)]
 }

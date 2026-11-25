@@ -55,7 +55,7 @@ export default function ViewPage() {
     <QueryState query={view} label="the view">
       {data => (
         <IssuesView
-          key={`${data.id}-${data.team?.key ?? 'all'}`}
+          key={data.id}
           title={data.name}
           filters={data.team ? { team: data.team.key } : {}}
           teamKey={data.team?.key}

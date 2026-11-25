@@ -4,7 +4,7 @@ import QueryState from './QueryState.jsx'
 import { priorities, statuses } from '../lib/issueOptions.js'
 import { useCreateIssue, useTeams } from '../lib/queries.js'
 
-function CreateIssueForm({ teams, defaultTeamKey, onClose }) {
+function CreateIssueForm({ teams, defaultTeamKey, cycleId, onClose }) {
   const createIssue = useCreateIssue()
   const [fields, setFields] = useState({
     teamKey: teams.some(team => team.key === defaultTeamKey) ? defaultTeamKey : teams[0].key,
@@ -18,7 +18,8 @@ function CreateIssueForm({ teams, defaultTeamKey, onClose }) {
   function submit(event) {
     event.preventDefault()
     if (!fields.title.trim() || createIssue.isPending) return
-    createIssue.mutate(fields, { onSuccess: onClose })
+    const inCycle = cycleId && fields.teamKey === defaultTeamKey
+    createIssue.mutate({ ...fields, ...(inCycle && { cycleId }) }, { onSuccess: onClose })
   }
 
   return (
@@ -81,14 +82,14 @@ function CreateIssueForm({ teams, defaultTeamKey, onClose }) {
   )
 }
 
-export default function CreateIssueDialog({ defaultTeamKey, onClose }) {
+export default function CreateIssueDialog({ defaultTeamKey, cycleId, onClose }) {
   const teams = useTeams()
   return (
     <Dialog label="New issue" className="is-form" onClose={onClose}>
       <QueryState query={teams} label="teams">
         {data =>
           data.length ? (
-            <CreateIssueForm teams={data} defaultTeamKey={defaultTeamKey} onClose={onClose} />
+            <CreateIssueForm teams={data} defaultTeamKey={defaultTeamKey} cycleId={cycleId} onClose={onClose} />
           ) : (
             <p className="empty-state">You are not in any team yet, so you cannot create issues.</p>
           )}

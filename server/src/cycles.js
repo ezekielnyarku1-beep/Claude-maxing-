@@ -32,24 +32,30 @@ function plannedCycles(team, last, today) {
   return cycles
 }
 
-async function syncTeamCycles(team, today) {
-  const last = await prisma.cycle.findFirst({ where: { teamId: team.id }, orderBy: { number: 'desc' } })
-  const planned = plannedCycles(team, last, today)
-  if (planned.length) await prisma.cycle.createMany({ data: planned, skipDuplicates: true })
+async function syncTeamCycles(teamId, today) {
+  await prisma.$transaction(async tx => {
+    await tx.$queryRaw`SELECT id FROM "Team" WHERE id = ${teamId} FOR UPDATE`
+    const team = await tx.team.findUnique({ where: { id: teamId } })
+    if (!team?.cycleWeeks) return
 
-  const current = await prisma.cycle.findFirst({
-    where: { teamId: team.id, startDate: { lte: today }, endDate: { gte: today } },
-  })
-  if (current) {
-    await prisma.issue.updateMany({
-      where: { teamId: team.id, status: { in: openStatuses }, cycle: { endDate: { lt: today } } },
-      data: { cycleId: current.id },
+    const last = await tx.cycle.findFirst({ where: { teamId }, orderBy: { number: 'desc' } })
+    const planned = plannedCycles(team, last, today)
+    if (planned.length) await tx.cycle.createMany({ data: planned, skipDuplicates: true })
+
+    const current = await tx.cycle.findFirst({
+      where: { teamId, startDate: { lte: today }, endDate: { gte: today } },
     })
-  }
+    if (current) {
+      await tx.issue.updateMany({
+        where: { teamId, status: { in: openStatuses }, cycle: { endDate: { lt: today } } },
+        data: { cycleId: current.id },
+      })
+    }
+  }, { maxWait: 10000, timeout: 20000 })
 }
 
 export async function syncCycles(teamWhere = {}) {
   const today = startOfTodayUtc()
-  const teams = await prisma.team.findMany({ where: { ...teamWhere, cycleWeeks: { not: null } } })
-  for (const team of teams) await syncTeamCycles(team, today)
+  const teams = await prisma.team.findMany({ where: { ...teamWhere, cycleWeeks: { not: null } }, select: { id: true } })
+  for (const team of teams) await syncTeamCycles(team.id, today)
 }

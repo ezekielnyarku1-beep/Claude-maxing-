@@ -20,8 +20,12 @@ export async function findVisibleTeam(user, key) {
   return team
 }
 
+const identifierPattern = /^([A-Z][A-Z0-9]{1,9})-(\d{1,9})$/
+
+export const teamKeyOf = identifier => identifierPattern.exec(identifier)?.[1] ?? null
+
 export async function findVisibleIssue(user, identifier, include) {
-  const match = /^([A-Z][A-Z0-9]{1,9})-(\d{1,9})$/.exec(identifier)
+  const match = identifierPattern.exec(identifier)
   const issue = match && await prisma.issue.findFirst({
     where: { number: Number(match[2]), team: { key: match[1], ...visibleTeamsWhere(user) } },
     include,

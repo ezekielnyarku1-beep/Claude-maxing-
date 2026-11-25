@@ -9,12 +9,12 @@ const isTypingIn = target => target instanceof Element && target.closest('input,
 
 export default function Shell() {
   const { pathname } = useLocation()
-  const [createIssue, setCreateIssue] = useState({ open: false, teamKey: '' })
+  const [createIssue, setCreateIssue] = useState({ open: false, teamKey: '', cycleId: null })
   const [commandMenuOpen, setCommandMenuOpen] = useState(false)
   const pageTeamKey = matchPath('/team/:teamKey', pathname)?.params.teamKey ?? ''
 
   const openCreateIssue = useCallback(
-    teamKey => setCreateIssue({ open: true, teamKey: teamKey ?? pageTeamKey }),
+    (teamKey, cycleId = null) => setCreateIssue({ open: true, teamKey: teamKey ?? pageTeamKey, cycleId }),
     [pageTeamKey],
   )
   const shell = useMemo(() => ({ openCreateIssue, openCommandMenu: () => setCommandMenuOpen(true) }), [openCreateIssue])
@@ -46,7 +46,11 @@ export default function Shell() {
         </main>
       </div>
       {createIssue.open && (
-        <CreateIssueDialog defaultTeamKey={createIssue.teamKey} onClose={() => setCreateIssue({ open: false, teamKey: '' })} />
+        <CreateIssueDialog
+          defaultTeamKey={createIssue.teamKey}
+          cycleId={createIssue.cycleId}
+          onClose={() => setCreateIssue({ open: false, teamKey: '', cycleId: null })}
+        />
       )}
       {commandMenuOpen && <CommandMenu onClose={() => setCommandMenuOpen(false)} />}
     </ShellContext.Provider>

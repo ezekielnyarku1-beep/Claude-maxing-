@@ -9,6 +9,7 @@ import { isId, readBody, readBoolean, readChoiceList, readIdList, readTeamKey, r
 export const viewsRouter = Router()
 
 const maxViews = 50
+const maxFilterIds = 500
 const priorities = Object.values(IssuePriority)
 const viewInclude = { team: teamSelect }
 const serializeView = view => ({ id: view.id, name: view.name, team: view.team, filter: view.filter })
@@ -23,8 +24,8 @@ function readViewFilter(value) {
   }
   return {
     priorities: readChoiceList(value.priorities, 'Priorities', priorities),
-    assigneeIds: readIdList(value.assigneeIds, 'Assignees'),
-    labelIds: readIdList(value.labelIds, 'Labels'),
+    assigneeIds: readIdList(value.assigneeIds, 'Assignees', { max: maxFilterIds }),
+    labelIds: readIdList(value.labelIds, 'Labels', { max: maxFilterIds }),
     showClosed: readBoolean(value.showClosed, 'Show done and canceled'),
   }
 }
@@ -60,7 +61,7 @@ viewsRouter.get('/:id', async (request, response) => {
 
 viewsRouter.post('/', async (request, response) => {
   const fields = await readViewFields(request.user, readBody(request), { creating: true })
-  if (await prisma.savedView.count({ where: { ownerId: request.user.id } }) >= maxViews) {
+  if (await prisma.savedView.count({ where: ownVisibleViews(request.user) }) >= maxViews) {
     throw new HttpError(400, `You can save up to ${maxViews} views. Delete one first.`)
   }
   const view = await prisma.savedView.create({ data: { ...fields, ownerId: request.user.id }, include: viewInclude })

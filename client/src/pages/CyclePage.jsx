@@ -20,6 +20,7 @@ export default function CyclePage() {
             title={`${teamKey} · Cycle ${cycle.number}`}
             filters={{ team: teamKey, cycle: cycle.id }}
             teamKey={teamKey}
+            cycleId={cycle.state === 'past' ? null : cycle.id}
             summary={<CycleSummary teamKey={teamKey} cycle={cycle} />}
           />
         )

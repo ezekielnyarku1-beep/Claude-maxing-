@@ -114,6 +114,8 @@ test('turning cycles off removes upcoming cycles, and turning on again continues
   assert.equal(off.body.cycleWeeks, null)
   const remaining = (await server.call('GET', '/api/teams/ENG/cycles', { as: admin })).body
   assert.deepEqual(remaining.map(cycle => cycle.state), ['current'])
+  const intoLeftover = await server.call('PATCH', `/api/issues/ENG-${issue.number}`, { as: admin, body: { cycleId: remaining[0].id } })
+  assert.equal(intoLeftover.status, 400)
   const unplanned = await server.call('GET', `/api/issues/ENG-${issue.number}`, { as: admin })
   assert.equal(unplanned.body.cycle, null)
 

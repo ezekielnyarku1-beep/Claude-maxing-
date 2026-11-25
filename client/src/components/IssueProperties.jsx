@@ -15,9 +15,10 @@ export default function IssueProperties({ issue, onSave }) {
   const team = useTeam(issue.team.key)
   const labels = useLabels()
   const projects = useProjects({ team: issue.team.key })
-  const cycles = useCycles(issue.team.key)
+  const cyclesOn = Boolean(team.data?.cycleWeeks)
+  const cycles = useCycles(issue.team.key, cyclesOn)
   const loadError = [team, labels, projects, cycles].find(query => query.isError)
-  const openCycles = (cycles.data ?? []).filter(cycle => cycle.state !== 'past').reverse()
+  const openCycles = cyclesOn ? (cycles.data ?? []).filter(cycle => cycle.state !== 'past').reverse() : []
 
   const assigneeOptions = [
     { value: noneValue, label: 'No assignee' },

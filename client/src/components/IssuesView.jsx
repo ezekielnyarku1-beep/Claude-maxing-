@@ -15,7 +15,7 @@ const views = [
   { value: 'board', label: 'Board' },
 ]
 
-export default function IssuesView({ title, filters, teamKey, summary, initialFilter = emptyFilter, actions }) {
+export default function IssuesView({ title, filters, teamKey, cycleId, summary, initialFilter = emptyFilter, actions }) {
   const [searchParams, setSearchParams] = useSearchParams()
   const [filter, setFilter] = useState(initialFilter)
   const { openCreateIssue } = useShell()
@@ -70,7 +70,7 @@ export default function IssuesView({ title, filters, teamKey, summary, initialFi
               return (
                 <div className="empty-state">
                   <p>No issues here yet.</p>
-                  <button type="button" className="button is-primary" onClick={() => openCreateIssue(teamKey)}>
+                  <button type="button" className="button is-primary" onClick={() => openCreateIssue(teamKey, cycleId)}>
                     Create an issue
                   </button>
                 </div>

@@ -74,11 +74,12 @@ teamsRouter.patch('/:key', requireAdmin, async (request, response) => {
   }
   if (!Object.keys(data).length) throw new HttpError(400, 'There is nothing to change.')
   const updated = await prisma.$transaction(async tx => {
+    await tx.$queryRaw`SELECT id FROM "Team" WHERE id = ${team.id} FOR UPDATE`
     if (data.cycleWeeks === null) {
       await tx.cycle.deleteMany({ where: { teamId: team.id, startDate: { gt: startOfTodayUtc() } } })
     }
     return tx.team.update({ where: { id: team.id }, data })
-  })
+  }, { maxWait: 10000, timeout: 20000 })
   const progress = await loadProgress('teamId', [team.id])
   response.json(serializeTeam(updated, progress.get(team.id)))
 })

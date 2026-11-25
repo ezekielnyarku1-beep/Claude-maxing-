@@ -29,8 +29,10 @@ export async function checkIssueReferences(tx, teamId, { assigneeId, projectId, 
     if (!project) throw new HttpError(400, 'The project must belong to the same team.')
   }
   if (cycleId) {
-    const cycle = await tx.cycle.findFirst({ where: { id: cycleId, teamId, endDate: { gte: startOfTodayUtc() } } })
-    if (!cycle) throw new HttpError(400, 'Pick a current or upcoming cycle from the same team.')
+    const cycle = await tx.cycle.findFirst({
+      where: { id: cycleId, teamId, endDate: { gte: startOfTodayUtc() }, team: { cycleWeeks: { not: null } } },
+    })
+    if (!cycle) throw new HttpError(400, 'Pick a current or upcoming cycle from the same team, with cycles turned on.')
   }
   if (labelIds?.length) {
     const found = await tx.label.count({ where: { id: { in: labelIds } } })

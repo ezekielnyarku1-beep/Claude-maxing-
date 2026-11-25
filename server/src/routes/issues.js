@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { prisma } from '../db.js'
-import { findVisibleIssue, findVisibleTeam, visibleTeamsWhere } from '../access.js'
+import { findVisibleIssue, findVisibleTeam, teamKeyOf, visibleTeamsWhere } from '../access.js'
 import { syncCycles } from '../cycles.js'
 import { HttpError } from '../errors.js'
 import { IssuePriority, IssueStatus } from '../generated/prisma/enums.ts'
@@ -60,7 +60,8 @@ issuesRouter.get('/', async (request, response) => {
 })
 
 issuesRouter.get('/:identifier', async (request, response) => {
-  await syncCycles(visibleTeamsWhere(request.user))
+  const teamKey = teamKeyOf(request.params.identifier)
+  if (teamKey) await syncCycles({ ...visibleTeamsWhere(request.user), key: teamKey })
   const issue = await findVisibleIssue(request.user, request.params.identifier, issueDetailInclude)
   response.json(serializeIssueDetail(issue))
 })
