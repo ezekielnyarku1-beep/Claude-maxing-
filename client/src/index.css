@@ -11,7 +11,8 @@
   --google-stroke: light-dark(#747775, #8e918f);
   --google-text: light-dark(#1f1f1f, #e3e3e3);
 
-  --font-sans: "Geist", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-serif: Georgia, "Times New Roman", serif;
   --text-base: 13px;
   --line-base: 20px;
   --text-small: 12px;
@@ -89,8 +90,12 @@ a {
 
 h1,
 h2,
-h3 {
+h3,
+h4,
+h5,
+h6 {
   margin: 0;
+  font-family: var(--font-serif);
   letter-spacing: var(--tracking-title);
 }
 
