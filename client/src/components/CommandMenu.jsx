@@ -1,6 +1,7 @@
 import { useEffect, useId, useState } from 'react'
 import { useNavigate } from 'react-router'
 import Dialog from './Dialog.jsx'
+import Skeleton from './Skeleton.jsx'
 import { useIssues, useProjects, useTeams } from '../lib/queries.js'
 import { useShell } from '../lib/shellContext.js'
 
@@ -92,11 +93,7 @@ export default function CommandMenu({ onClose }) {
           </li>
         ))}
       </ul>
-      {isLoading && (
-        <p className="command-note" role="status">
-          Loading…
-        </p>
-      )}
+      {isLoading && <Skeleton label="search results" layout="menu" />}
       {queries.some(query => query.isError) && (
         <p className="command-note" role="alert">
           Some results could not load.{' '}

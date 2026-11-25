@@ -1,13 +1,8 @@
+import Skeleton from './Skeleton.jsx'
 import NotFoundPage from '../pages/NotFoundPage.jsx'
 
-export default function QueryState({ query, label, children }) {
-  if (query.isPending) {
-    return (
-      <p className="query-state" role="status">
-        Loading {label}…
-      </p>
-    )
-  }
+export default function QueryState({ query, label, skeleton, children }) {
+  if (query.isPending) return <Skeleton label={label} layout={skeleton} />
 
   if (query.isError) {
     if (query.error.status === 404) return <NotFoundPage />

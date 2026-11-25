@@ -13,7 +13,7 @@ export default function TeamCyclesPage() {
   const cycles = useCycles(teamKey)
 
   return (
-    <QueryState query={team} label="the team">
+    <QueryState query={team} label="the team" skeleton="page">
       {teamData => (
         <div className="cycles-page">
           <PageHeader title={`${teamData.name} cycles`} meta={cycles.data && `${cycles.data.length} cycles`}>

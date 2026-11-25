@@ -70,7 +70,7 @@ function IssueEditor({ issue, headingLevel }) {
 export default function IssueDetail({ identifier, headingLevel }) {
   const issue = useIssue(identifier)
   return (
-    <QueryState query={issue} label="the issue">
+    <QueryState query={issue} label="the issue" skeleton="detail">
       {data => <IssueEditor key={data.id} issue={data} headingLevel={headingLevel} />}
     </QueryState>
   )

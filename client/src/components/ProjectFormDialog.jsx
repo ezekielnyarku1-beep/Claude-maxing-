@@ -101,7 +101,7 @@ export default function ProjectFormDialog({ project, onClose }) {
   const teams = useTeams()
   return (
     <Dialog label={project ? 'Edit project' : 'New project'} className="is-form" onClose={onClose}>
-      <QueryState query={teams} label="teams">
+      <QueryState query={teams} label="teams" skeleton="form">
         {data =>
           data.length ? (
             <ProjectForm project={project} teams={data} onClose={onClose} />

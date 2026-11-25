@@ -6,7 +6,7 @@ import { useMe } from '../lib/queries.js'
 export default function RequireAdmin() {
   const me = useMe()
   return (
-    <QueryState query={me} label="your account">
+    <QueryState query={me} label="your account" skeleton="form">
       {user => (user.role === 'ADMIN' ? <Outlet /> : <NoAccessPage />)}
     </QueryState>
   )

@@ -5,13 +5,7 @@ export default function GuestOnly() {
   const session = authClient.useSession()
   const [searchParams] = useSearchParams()
 
-  if (session.isPending) {
-    return (
-      <p className="query-state" role="status">
-        Loading…
-      </p>
-    )
-  }
+  if (session.isPending) return null
   if (session.data?.user) return <Navigate to={safeRedirectPath(searchParams.get('redirectTo'))} replace />
   return <Outlet />
 }

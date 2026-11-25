@@ -1,0 +1,158 @@
+.skeleton-bar,
+.skeleton-dot {
+  display: block;
+  background: var(--hover);
+}
+
+.skeleton-bar {
+  height: 10px;
+  border-radius: 4px;
+}
+
+.skeleton-dot {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+.skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+  height: var(--row-list);
+  padding: 0 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.skeleton-id {
+  flex: none;
+  width: 44px;
+}
+
+.skeleton-meta {
+  flex: none;
+  width: 56px;
+  margin-left: auto;
+}
+
+.skeleton-header {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.skeleton-title {
+  width: 140px;
+  height: 12px;
+}
+
+.skeleton-detail {
+  display: grid;
+  gap: 12px;
+  padding: 24px;
+}
+
+.skeleton-heading {
+  height: 16px;
+}
+
+.skeleton-properties {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 12px var(--gap);
+  margin-top: 12px;
+}
+
+.skeleton-label {
+  width: 72px;
+  height: 8px;
+}
+
+.skeleton-form {
+  display: grid;
+  gap: 16px;
+  padding: 16px 0;
+}
+
+.skeleton-field {
+  display: grid;
+  gap: var(--gap-small);
+}
+
+.skeleton-input {
+  display: block;
+  width: min(100%, 320px);
+  height: var(--control-height);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.skeleton.is-menu .skeleton-row {
+  height: var(--row-menu);
+  padding: 0 12px;
+  border-bottom: 0;
+}
+
+.skeleton-shell {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.skeleton-sidebar {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding: 16px;
+  background: var(--bg);
+  border-right: 1px solid var(--line);
+}
+
+.skeleton-main {
+  background: var(--panel);
+}
+
+@media (max-width: 768px) {
+  .skeleton-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .skeleton-sidebar {
+    display: none;
+  }
+
+  .skeleton-row,
+  .skeleton-header {
+    padding: 0 12px;
+  }
+
+  .skeleton-detail {
+    padding: 16px 12px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .skeleton {
+    animation: skeleton-in var(--motion) ease-out var(--motion-delay) both;
+  }
+
+  .skeleton-bar,
+  .skeleton-dot {
+    background: linear-gradient(90deg, var(--hover) 0%, var(--line) 50%, var(--hover) 100%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  }
+
+  @keyframes skeleton-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes skeleton-shimmer {
+    from { background-position: 100% 0; }
+    to { background-position: -100% 0; }
+  }
+}

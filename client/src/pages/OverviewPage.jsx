@@ -91,7 +91,7 @@ export default function OverviewPage() {
               <h2 id="progress-heading">Project progress</h2>
               <Link to="/projects">View all</Link>
             </div>
-            <QueryState query={projects} label="projects">
+            <QueryState query={projects} label="projects" skeleton="short">
               {data => {
                 const active = data.filter(project => project.progress.activeCount > project.progress.doneCount)
                 return active.length ? (

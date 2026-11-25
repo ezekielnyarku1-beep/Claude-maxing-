@@ -11,7 +11,7 @@ export default function CyclePage() {
   const cyclesOn = Boolean(useTeam(teamKey).data?.cycleWeeks)
 
   return (
-    <QueryState query={cycles} label="the cycle">
+    <QueryState query={cycles} label="the cycle" skeleton="page">
       {data => {
         const cycle = data.find(item => String(item.number) === cycleNumber)
         if (!cycle) return <NotFoundPage />
