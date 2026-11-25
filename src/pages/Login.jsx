@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth'
 import { api } from '../api'
-import { Brand, ThemeSwitch, usePageTitle } from '../components'
+import { Brand, usePageTitle } from '../components'
 import './Login.css'
 
 function AuthLayout({ title, subtitle, footer, children }) {
@@ -19,7 +19,6 @@ function AuthLayout({ title, subtitle, footer, children }) {
         <small>Overview Teams · Project management</small>
       </aside>
       <section className="workspace" aria-labelledby="login-title">
-        <ThemeSwitch />
         <div className="login-content">
           <Brand />
           <h1 id="login-title">{title}</h1>
