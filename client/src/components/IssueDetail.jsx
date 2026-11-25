@@ -5,16 +5,17 @@ import IssueProperties from './IssueProperties.jsx'
 import QueryState from './QueryState.jsx'
 import { useIssue, useUpdateIssue } from '../lib/queries.js'
 
-function useDraft(savedValue, onFinish) {
+function useDraft(savedValue, toChanges, save) {
   const [draft, setDraft] = useState(null)
+  const clear = () => setDraft(null)
   return {
     value: draft ? draft.value : savedValue,
-    onFocus: () => setDraft({ original: savedValue, value: savedValue }),
+    onFocus: () => setDraft(current => current ?? { original: savedValue, value: savedValue }),
     onChange: event => setDraft({ ...draft, value: event.target.value }),
     onBlur: () => {
-      const edited = draft.value.trim()
-      setDraft(null)
-      if (edited !== draft.original.trim()) onFinish(edited)
+      const changes = draft.value.trim() === draft.original.trim() ? null : toChanges(draft.value)
+      if (changes) save(changes, { onSuccess: clear })
+      else clear()
     },
   }
 }
@@ -22,9 +23,9 @@ function useDraft(savedValue, onFinish) {
 function IssueEditor({ issue, headingLevel }) {
   const Heading = headingLevel === 1 ? 'h1' : 'h2'
   const updateIssue = useUpdateIssue()
-  const save = changes => updateIssue.mutate({ identifier: issue.identifier, changes })
-  const title = useDraft(issue.title, value => value && save({ title: value }))
-  const description = useDraft(issue.description, value => save({ description: value }))
+  const save = (changes, options) => updateIssue.mutate({ identifier: issue.identifier, changes }, options)
+  const title = useDraft(issue.title, value => value.trim() && { title: value.trim() }, save)
+  const description = useDraft(issue.description, value => ({ description: value }), save)
 
   return (
     <article className="issue-detail">

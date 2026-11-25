@@ -74,7 +74,7 @@ teamsRouter.patch('/:key', requireAdmin, async (request, response) => {
   }
   if (!Object.keys(data).length) throw new HttpError(400, 'There is nothing to change.')
   const updated = await prisma.$transaction(async tx => {
-    await tx.$queryRaw`SELECT id FROM "Team" WHERE id = ${team.id} FOR UPDATE`
+    await tx.$queryRaw`SELECT id FROM "Team" WHERE id = ${team.id} FOR NO KEY UPDATE`
     if (data.cycleWeeks === null) {
       await tx.cycle.deleteMany({ where: { teamId: team.id, startDate: { gt: startOfTodayUtc() } } })
     }
@@ -97,9 +97,13 @@ teamsRouter.post('/:key/members', requireAdmin, async (request, response) => {
 
 teamsRouter.delete('/:key/members/:userId', requireAdmin, async (request, response) => {
   const team = await findVisibleTeam(request.user, request.params.key)
-  const { count } = isId(request.params.userId)
-    ? await prisma.teamMember.deleteMany({ where: { teamId: team.id, userId: request.params.userId } })
-    : { count: 0 }
+  const userId = request.params.userId
+  const [{ count }] = isId(userId)
+    ? await prisma.$transaction([
+      prisma.teamMember.deleteMany({ where: { teamId: team.id, userId } }),
+      prisma.savedView.deleteMany({ where: { teamId: team.id, ownerId: userId } }),
+    ])
+    : [{ count: 0 }]
   if (!count) throw new HttpError(404, 'That person is not in this team.')
   response.json(await loadMembers(team.id))
 })

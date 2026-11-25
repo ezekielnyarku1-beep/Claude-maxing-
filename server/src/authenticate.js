@@ -2,7 +2,7 @@ import { jwtVerify } from 'jose'
 import { prisma } from './db.js'
 import { HttpError } from './errors.js'
 
-const keyServiceErrors = new Set(['ERR_JWKS_TIMEOUT', 'ERR_JWKS_INVALID', 'NO_CODE'])
+const keyServiceErrors = new Set(['ERR_JWKS_TIMEOUT', 'ERR_JWKS_INVALID', 'ERR_JOSE_GENERIC', 'NO_CODE'])
 
 async function readVerifiedClaims(request, { keySet, issuer }) {
   const [scheme, token] = (request.get('authorization') ?? '').split(' ')

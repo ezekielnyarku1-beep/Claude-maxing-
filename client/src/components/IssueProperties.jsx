@@ -140,6 +140,7 @@ export default function IssueProperties({ issue, onSave }) {
               setDueDraft(null)
               if (value !== (issue.dueDate ?? '')) onSave({ dueDate: value || null })
             }}
+            onBlur={() => setDueDraft(null)}
           />
         </dd>
       </dl>

@@ -42,7 +42,7 @@ function ViewActions({ view, filter }) {
         {confirmingDelete ? 'Confirm delete' : 'Delete'}
       </button>
       {error && <p className="inline-error page-header-error" role="alert">{error.message}</p>}
-      {editing && <ViewFormDialog view={view} onClose={() => setEditing(false)} />}
+      {editing && <ViewFormDialog view={view} filter={filter} onClose={() => setEditing(false)} />}
     </>
   )
 }
@@ -55,7 +55,7 @@ export default function ViewPage() {
     <QueryState query={view} label="the view">
       {data => (
         <IssuesView
-          key={data.id}
+          key={`${data.id}-${data.team?.key ?? 'all'}`}
           title={data.name}
           filters={data.team ? { team: data.team.key } : {}}
           teamKey={data.team?.key}

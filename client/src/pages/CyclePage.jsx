@@ -3,11 +3,12 @@ import CycleSummary from '../components/CycleSummary.jsx'
 import IssuesView from '../components/IssuesView.jsx'
 import QueryState from '../components/QueryState.jsx'
 import NotFoundPage from './NotFoundPage.jsx'
-import { useCycles } from '../lib/queries.js'
+import { useCycles, useTeam } from '../lib/queries.js'
 
 export default function CyclePage() {
   const { teamKey, cycleNumber } = useParams()
   const cycles = useCycles(teamKey)
+  const cyclesOn = Boolean(useTeam(teamKey).data?.cycleWeeks)
 
   return (
     <QueryState query={cycles} label="the cycle">
@@ -20,7 +21,7 @@ export default function CyclePage() {
             title={`${teamKey} · Cycle ${cycle.number}`}
             filters={{ team: teamKey, cycle: cycle.id }}
             teamKey={teamKey}
-            cycleId={cycle.state === 'past' ? null : cycle.id}
+            cycleId={cyclesOn && cycle.state !== 'past' ? cycle.id : null}
             summary={<CycleSummary teamKey={teamKey} cycle={cycle} />}
           />
         )

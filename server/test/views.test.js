@@ -71,3 +71,11 @@ test('a view for a team you left is hidden', async () => {
   assert.deepEqual((await server.call('GET', '/api/views', { as: engMember })).body, [])
   assert.equal((await server.call('GET', `/api/views/${view.id}`, { as: engMember })).status, 404)
 })
+
+test('removing someone from a team deletes their views for that team, so they do not count against the limit', async () => {
+  await save(engMember, { name: 'Eng only', teamKey: 'ENG', filter })
+  await save(engMember, { name: 'Everywhere', teamKey: null, filter })
+  const removed = await server.call('DELETE', `/api/teams/ENG/members/${fixtures.engUser.id}`, { as: admin })
+  assert.equal(removed.status, 200)
+  assert.deepEqual(await prisma.savedView.findMany({ where: { ownerId: fixtures.engUser.id }, select: { name: true } }), [{ name: 'Everywhere' }])
+})

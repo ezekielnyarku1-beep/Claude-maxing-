@@ -32,30 +32,34 @@ function plannedCycles(team, last, today) {
   return cycles
 }
 
+const lastCycle = (db, teamId) => db.cycle.findFirst({ where: { teamId }, orderBy: { number: 'desc' } })
+const leftBehindWhere = (teamId, today) => ({ teamId, status: { in: openStatuses }, cycle: { endDate: { lt: today } } })
+
+async function needsSync(team, today) {
+  if (plannedCycles(team, await lastCycle(prisma, team.id), today).length) return true
+  return (await prisma.issue.count({ where: leftBehindWhere(team.id, today) })) > 0
+}
+
 async function syncTeamCycles(teamId, today) {
   await prisma.$transaction(async tx => {
-    await tx.$queryRaw`SELECT id FROM "Team" WHERE id = ${teamId} FOR UPDATE`
+    await tx.$queryRaw`SELECT id FROM "Team" WHERE id = ${teamId} FOR NO KEY UPDATE`
     const team = await tx.team.findUnique({ where: { id: teamId } })
     if (!team?.cycleWeeks) return
 
-    const last = await tx.cycle.findFirst({ where: { teamId }, orderBy: { number: 'desc' } })
-    const planned = plannedCycles(team, last, today)
+    const planned = plannedCycles(team, await lastCycle(tx, teamId), today)
     if (planned.length) await tx.cycle.createMany({ data: planned, skipDuplicates: true })
 
     const current = await tx.cycle.findFirst({
       where: { teamId, startDate: { lte: today }, endDate: { gte: today } },
     })
-    if (current) {
-      await tx.issue.updateMany({
-        where: { teamId, status: { in: openStatuses }, cycle: { endDate: { lt: today } } },
-        data: { cycleId: current.id },
-      })
-    }
+    if (current) await tx.issue.updateMany({ where: leftBehindWhere(teamId, today), data: { cycleId: current.id } })
   }, { maxWait: 10000, timeout: 20000 })
 }
 
 export async function syncCycles(teamWhere = {}) {
   const today = startOfTodayUtc()
-  const teams = await prisma.team.findMany({ where: { ...teamWhere, cycleWeeks: { not: null } }, select: { id: true } })
-  for (const team of teams) await syncTeamCycles(team.id, today)
+  const teams = await prisma.team.findMany({ where: { ...teamWhere, cycleWeeks: { not: null } } })
+  for (const team of teams) {
+    if (await needsSync(team, today)) await syncTeamCycles(team.id, today)
+  }
 }
