@@ -35,8 +35,12 @@ function plannedCycles(team, last, today) {
 const lastCycle = (db, teamId) => db.cycle.findFirst({ where: { teamId }, orderBy: { number: 'desc' } })
 const leftBehindWhere = (teamId, today) => ({ teamId, status: { in: openStatuses }, cycle: { endDate: { lt: today } } })
 
+const currentCycle = (db, teamId, today) =>
+  db.cycle.findFirst({ where: { teamId, startDate: { lte: today }, endDate: { gte: today } } })
+
 async function needsSync(team, today) {
   if (plannedCycles(team, await lastCycle(prisma, team.id), today).length) return true
+  if (!await currentCycle(prisma, team.id, today)) return false
   return (await prisma.issue.count({ where: leftBehindWhere(team.id, today) })) > 0
 }
 
@@ -49,9 +53,7 @@ async function syncTeamCycles(teamId, today) {
     const planned = plannedCycles(team, await lastCycle(tx, teamId), today)
     if (planned.length) await tx.cycle.createMany({ data: planned, skipDuplicates: true })
 
-    const current = await tx.cycle.findFirst({
-      where: { teamId, startDate: { lte: today }, endDate: { gte: today } },
-    })
+    const current = await currentCycle(tx, teamId, today)
     if (current) await tx.issue.updateMany({ where: leftBehindWhere(teamId, today), data: { cycleId: current.id } })
   }, { maxWait: 10000, timeout: 20000 })
 }

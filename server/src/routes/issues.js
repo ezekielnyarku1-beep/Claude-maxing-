@@ -33,7 +33,7 @@ function readIssueFields(body, { creating }) {
   const fields = {}
   if (creating || 'title' in body) fields.title = readText(body.title, 'Title', { max: 200 })
   if (creating || 'status' in body) fields.status = readChoice(body.status, 'Status', statuses)
-  if ('description' in body) fields.description = readText(body.description, 'Description', { max: 10000, allowEmpty: true })
+  if ('description' in body) fields.description = readText(body.description, 'Description', { max: 10000, allowEmpty: true, keepSpaces: true })
   if ('priority' in body) fields.priority = readChoice(body.priority, 'Priority', priorities)
   if ('assigneeId' in body) fields.assigneeId = readOptionalId(body.assigneeId, 'Assignee')
   if ('projectId' in body) fields.projectId = readOptionalId(body.projectId, 'Project')

@@ -79,3 +79,13 @@ test('removing someone from a team deletes their views for that team, so they do
   assert.equal(removed.status, 200)
   assert.deepEqual(await prisma.savedView.findMany({ where: { ownerId: fixtures.engUser.id }, select: { name: true } }), [{ name: 'Everywhere' }])
 })
+
+test('removing someone who is not in the team, or an admin, keeps their views', async () => {
+  await save(admin, { name: 'Admin ENG', teamKey: 'ENG', filter })
+  const notMember = await server.call('DELETE', `/api/teams/ENG/members/${fixtures.adminUser.id}`, { as: admin })
+  assert.equal(notMember.status, 404)
+  await prisma.teamMember.create({ data: { teamId: fixtures.eng.id, userId: fixtures.adminUser.id } })
+  const removed = await server.call('DELETE', `/api/teams/ENG/members/${fixtures.adminUser.id}`, { as: admin })
+  assert.equal(removed.status, 200)
+  assert.equal(await prisma.savedView.count({ where: { ownerId: fixtures.adminUser.id } }), 1)
+})

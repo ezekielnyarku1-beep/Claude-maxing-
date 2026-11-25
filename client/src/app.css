@@ -847,10 +847,6 @@
     animation: page-enter var(--motion-slow) var(--ease-out) both;
   }
 
-  .query-state[role="status"] {
-    animation: fade-in var(--motion) ease-out var(--motion-delay) both;
-  }
-
   .issue-list,
   .board,
   .project-rows,

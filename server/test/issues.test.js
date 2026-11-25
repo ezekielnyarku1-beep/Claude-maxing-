@@ -173,3 +173,12 @@ test('an admin can work in any team', async () => {
   const read = await server.call('GET', '/api/issues/DES-1', { as: desMember })
   assert.equal(read.status, 200)
 })
+
+test('descriptions keep their indentation but not trailing spaces', async () => {
+  const issue = await addIssue(fixtures.eng, fixtures.engUser, { title: 'Indented', status: 'TODO' })
+  const path = `/api/issues/ENG-${issue.number}`
+  const saved = await server.call('PATCH', path, { as: engMember, body: { description: '  code line\n  next line  \n' } })
+  assert.equal(saved.body.description, '  code line\n  next line')
+  const blank = await server.call('PATCH', path, { as: engMember, body: { description: '   ' } })
+  assert.equal(blank.body.description, '')
+})

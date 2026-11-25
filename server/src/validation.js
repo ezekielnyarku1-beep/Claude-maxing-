@@ -13,12 +13,13 @@ export function readBody(request) {
   return body
 }
 
-export function readText(value, label, { max, allowEmpty = false }) {
+export function readText(value, label, { max, allowEmpty = false, keepSpaces = false }) {
   if (typeof value !== 'string') throw new HttpError(400, `${label} must be text.`)
   const trimmed = value.trim()
   if (!allowEmpty && !trimmed) throw new HttpError(400, `${label} cannot be empty.`)
-  if (trimmed.length > max) throw new HttpError(400, `${label} can be at most ${max} characters.`)
-  return trimmed
+  const text = keepSpaces && trimmed ? value.trimEnd() : trimmed
+  if (text.length > max) throw new HttpError(400, `${label} can be at most ${max} characters.`)
+  return text
 }
 
 export function readChoice(value, label, choices) {

@@ -14,12 +14,12 @@ export default function ViewFormDialog({ view, teamKey = '', filter, onClose }) 
   function submit(event) {
     event.preventDefault()
     if (!name.trim() || save.isPending) return
-    const teamChanged = view && scope !== (view.team?.key ?? '')
+    const narrowedToTeam = view && scope && scope !== view.team?.key
     const fields = {
       name: name.trim(),
       teamKey: scope || null,
       ...(!view && { filter }),
-      ...(teamChanged && { filter: { ...filter, assigneeIds: [] } }),
+      ...(narrowedToTeam && { filter: { ...view.filter, assigneeIds: [] } }),
     }
     save.mutate({ id: view?.id, fields }, {
       onSuccess: saved => {

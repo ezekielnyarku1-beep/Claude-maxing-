@@ -27,7 +27,7 @@ async function findVisibleProject(user, id) {
 function readProjectFields(body, { creating }) {
   const fields = {}
   if (creating || 'name' in body) fields.name = readText(body.name, 'Project name', { max: 80 })
-  if ('description' in body) fields.description = readText(body.description, 'Description', { max: 5000, allowEmpty: true })
+  if ('description' in body) fields.description = readText(body.description, 'Description', { max: 5000, allowEmpty: true, keepSpaces: true })
   if ('ownerId' in body) fields.ownerId = readOptionalId(body.ownerId, 'Owner')
   if ('startDate' in body) fields.startDate = readOptionalDate(body.startDate, 'Start date')
   if ('targetDate' in body) fields.targetDate = readOptionalDate(body.targetDate, 'Target date')

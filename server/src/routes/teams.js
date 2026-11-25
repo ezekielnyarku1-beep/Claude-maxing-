@@ -98,12 +98,12 @@ teamsRouter.post('/:key/members', requireAdmin, async (request, response) => {
 teamsRouter.delete('/:key/members/:userId', requireAdmin, async (request, response) => {
   const team = await findVisibleTeam(request.user, request.params.key)
   const userId = request.params.userId
-  const [{ count }] = isId(userId)
-    ? await prisma.$transaction([
-      prisma.teamMember.deleteMany({ where: { teamId: team.id, userId } }),
-      prisma.savedView.deleteMany({ where: { teamId: team.id, ownerId: userId } }),
-    ])
-    : [{ count: 0 }]
-  if (!count) throw new HttpError(404, 'That person is not in this team.')
+  const notMember = new HttpError(404, 'That person is not in this team.')
+  if (!isId(userId)) throw notMember
+  await prisma.$transaction(async tx => {
+    const { count } = await tx.teamMember.deleteMany({ where: { teamId: team.id, userId } })
+    if (!count) throw notMember
+    await tx.savedView.deleteMany({ where: { teamId: team.id, ownerId: userId, owner: { role: 'MEMBER' } } })
+  }, { maxWait: 10000, timeout: 20000 })
   response.json(await loadMembers(team.id))
 })
