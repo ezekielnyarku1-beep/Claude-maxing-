@@ -1,9 +1,10 @@
 import { Router } from 'express'
 import { prisma } from '../db.js'
 import { findVisibleIssue, findVisibleTeam, visibleTeamsWhere } from '../access.js'
+import { syncCycles } from '../cycles.js'
 import { HttpError } from '../errors.js'
 import { IssuePriority, IssueStatus } from '../generated/prisma/enums.ts'
-import { checkIssueReferences, createIssue, describeChanges } from '../issues.js'
+import { checkIssueReferences, createIssue, describeChanges, notifyAssignee } from '../issues.js'
 import {
   issueDetailInclude,
   issueInclude,
@@ -15,6 +16,7 @@ import {
 import {
   readBody,
   readChoice,
+  readId,
   readIdList,
   readOptionalDate,
   readOptionalId,
@@ -35,16 +37,19 @@ function readIssueFields(body, { creating }) {
   if ('priority' in body) fields.priority = readChoice(body.priority, 'Priority', priorities)
   if ('assigneeId' in body) fields.assigneeId = readOptionalId(body.assigneeId, 'Assignee')
   if ('projectId' in body) fields.projectId = readOptionalId(body.projectId, 'Project')
+  if ('cycleId' in body) fields.cycleId = readOptionalId(body.cycleId, 'Cycle')
   if ('dueDate' in body) fields.dueDate = readOptionalDate(body.dueDate, 'Due date')
   if ('labelIds' in body) fields.labelIds = readIdList(body.labelIds, 'Labels')
   return fields
 }
 
 issuesRouter.get('/', async (request, response) => {
-  const { team, project, assignee } = request.query
+  const { team, project, cycle, assignee } = request.query
   const where = { team: visibleTeamsWhere(request.user) }
   if (typeof team === 'string') where.team.key = team
   if (project !== undefined) where.projectId = readOptionalId(project, 'Project')
+  if (cycle !== undefined) where.cycleId = readId(cycle, 'Cycle')
+  await syncCycles(where.team)
   if (assignee === 'me') where.assigneeId = request.user.id
   const issues = await prisma.issue.findMany({
     where,
@@ -55,6 +60,7 @@ issuesRouter.get('/', async (request, response) => {
 })
 
 issuesRouter.get('/:identifier', async (request, response) => {
+  await syncCycles(visibleTeamsWhere(request.user))
   const issue = await findVisibleIssue(request.user, request.params.identifier, issueDetailInclude)
   response.json(serializeIssueDetail(issue))
 })
@@ -65,7 +71,9 @@ issuesRouter.post('/', async (request, response) => {
   const fields = readIssueFields(body, { creating: true })
   const issue = await prisma.$transaction(async tx => {
     await checkIssueReferences(tx, team.id, fields)
-    return createIssue(tx, { ...fields, teamId: team.id, actorId: request.user.id }, issueInclude)
+    const created = await createIssue(tx, { ...fields, teamId: team.id, actorId: request.user.id }, issueInclude)
+    await notifyAssignee(tx, { issueId: created.id, assigneeId: created.assigneeId, actorId: request.user.id })
+    return created
   })
   response.status(201).json(serializeIssue(issue))
 })
@@ -86,6 +94,9 @@ issuesRouter.patch('/:identifier', async (request, response) => {
       data: { ...fields, ...(labelIds && { labels: { set: labelIds.map(id => ({ id })) } }) },
       include: issueInclude,
     })
+    if (updated.assigneeId !== before.assigneeId) {
+      await notifyAssignee(tx, { issueId: before.id, assigneeId: updated.assigneeId, actorId: request.user.id })
+    }
     const changes = describeChanges(before, updated)
     if (changes.length) {
       await tx.issueActivity.createMany({

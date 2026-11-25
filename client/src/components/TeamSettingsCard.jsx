@@ -1,20 +1,71 @@
 import { useState } from 'react'
 import Avatar from './Avatar.jsx'
 import QueryState from './QueryState.jsx'
-import { useAddTeamMember, useRemoveTeamMember, useRenameTeam, useTeam } from '../lib/queries.js'
+import { formatDateWithYear } from '../lib/format.js'
+import { useAddTeamMember, useRemoveTeamMember, useTeam, useUpdateTeam } from '../lib/queries.js'
+
+const todayString = () => new Date().toLocaleDateString('en-CA')
+
+function CycleSettings({ team, updateTeam }) {
+  const [weeks, setWeeks] = useState('2')
+  const [startDate, setStartDate] = useState(todayString)
+
+  if (team.cycleWeeks) {
+    return (
+      <div className="settings-inline">
+        <p className="settings-grow">
+          Cycles: every {team.cycleWeeks === 1 ? 'week' : '2 weeks'}, from {formatDateWithYear(team.cycleStartDate)}
+        </p>
+        <button
+          type="button"
+          className="button"
+          disabled={updateTeam.isPending}
+          onClick={() => updateTeam.mutate({ key: team.key, fields: { cycleWeeks: null } })}
+        >
+          Turn off cycles
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <form
+      className="settings-inline"
+      onSubmit={event => {
+        event.preventDefault()
+        if (startDate) updateTeam.mutate({ key: team.key, fields: { cycleWeeks: Number(weeks), cycleStartDate: startDate } })
+      }}
+    >
+      <label className="settings-field">
+        Cycle length
+        <select className="input" value={weeks} onChange={event => setWeeks(event.target.value)}>
+          <option value="1">1 week</option>
+          <option value="2">2 weeks</option>
+        </select>
+      </label>
+      <label className="settings-field">
+        First cycle starts
+        <input type="date" className="input" value={startDate} required onChange={event => setStartDate(event.target.value)} />
+      </label>
+      <button type="submit" className="button" disabled={!startDate || updateTeam.isPending}>
+        Turn on cycles
+      </button>
+    </form>
+  )
+}
 
 export default function TeamSettingsCard({ team, users }) {
   const detail = useTeam(team.key)
-  const rename = useRenameTeam()
+  const updateTeam = useUpdateTeam()
   const addMember = useAddTeamMember()
   const removeMember = useRemoveTeamMember()
   const [name, setName] = useState(team.name)
   const [newMemberId, setNewMemberId] = useState('')
-  const error = [rename, addMember, removeMember].find(mutation => mutation.isError)?.error
+  const error = [updateTeam, addMember, removeMember].find(mutation => mutation.isError)?.error
 
   function saveName(event) {
     event.preventDefault()
-    if (name.trim() && name.trim() !== team.name) rename.mutate({ key: team.key, name: name.trim() })
+    if (name.trim() && name.trim() !== team.name) updateTeam.mutate({ key: team.key, fields: { name: name.trim() } })
   }
 
   return (
@@ -27,10 +78,11 @@ export default function TeamSettingsCard({ team, users }) {
           Name of {team.key}
         </label>
         <input id={`team-name-${team.key}`} className="input" value={name} maxLength={60} onChange={event => setName(event.target.value)} />
-        <button type="submit" className="button" disabled={rename.isPending || !name.trim() || name.trim() === team.name}>
+        <button type="submit" className="button" disabled={updateTeam.isPending || !name.trim() || name.trim() === team.name}>
           Rename
         </button>
       </form>
+      <CycleSettings team={team} updateTeam={updateTeam} />
       {error && <p className="inline-error" role="alert">{error.message}</p>}
       <QueryState query={detail} label="members">
         {data => {

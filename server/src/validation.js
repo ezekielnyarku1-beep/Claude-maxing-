@@ -68,3 +68,15 @@ export function readColor(value) {
   }
   return value.toLowerCase()
 }
+
+export function readChoiceList(value, label, choices) {
+  if (!Array.isArray(value) || !value.every(item => choices.includes(item))) {
+    throw new HttpError(400, `${label} must be a list using only: ${choices.join(', ')}.`)
+  }
+  return [...new Set(value)]
+}
+
+export function readBoolean(value, label) {
+  if (typeof value !== 'boolean') throw new HttpError(400, `${label} must be true or false.`)
+  return value
+}

@@ -2,11 +2,20 @@ export const toDateString = date => (date ? date.toISOString().slice(0, 10) : nu
 
 export const personSelect = { select: { id: true, name: true } }
 export const teamSelect = { select: { id: true, key: true, name: true } }
+export const cycleSelect = { select: { id: true, number: true, startDate: true, endDate: true } }
+
+export const serializeCycleRef = cycle => cycle && ({
+  id: cycle.id,
+  number: cycle.number,
+  startDate: toDateString(cycle.startDate),
+  endDate: toDateString(cycle.endDate),
+})
 
 export const issueInclude = {
   team: teamSelect,
   assignee: personSelect,
   project: { select: { id: true, name: true } },
+  cycle: cycleSelect,
   labels: { select: { id: true, name: true, color: true }, orderBy: { name: 'asc' } },
 }
 
@@ -35,6 +44,7 @@ export function serializeIssue(issue) {
     team: issue.team,
     assignee: issue.assignee,
     project: issue.project,
+    cycle: serializeCycleRef(issue.cycle),
     labels: issue.labels,
   }
 }

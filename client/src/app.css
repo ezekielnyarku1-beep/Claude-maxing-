@@ -804,6 +804,8 @@
   .sidebar-item,
   .issue-row,
   .project-row,
+  .simple-row,
+  .inbox-link,
   .board-column,
   .settings-nav a,
   .picker li,
@@ -852,6 +854,8 @@
   .issue-list,
   .board,
   .project-rows,
+  .simple-rows,
+  .inbox-list,
   .settings-list,
   .settings-cards {
     animation: fade-in var(--motion) ease-out both;
@@ -968,7 +972,7 @@
     position: fixed;
     inset: auto 0 0;
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 4px;
     margin: 0;
     padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
@@ -984,6 +988,8 @@
     font-size: var(--text-small);
   }
   .primary-navigation .sidebar-item[aria-current="page"] { color: var(--acc); }
+  .primary-navigation .sidebar-item { position: relative; }
+  .primary-navigation .sidebar-badge { position: absolute; top: 4px; left: calc(50% + 6px); margin: 0; }
   .navigation-extra { display: none; }
   .navigation-extra.is-open {
     display: flex;
@@ -1078,6 +1084,40 @@
 
   .project-summary {
     padding: 12px;
+  }
+
+  .simple-row.is-cycle,
+  .simple-row.is-view {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 12px;
+    padding: var(--gap) 12px;
+  }
+
+  .simple-row .progress {
+    grid-column: 1 / -1;
+  }
+
+  .inbox-link {
+    grid-template-columns: 8px auto minmax(0, 1fr);
+    padding-left: 12px;
+  }
+
+  .inbox-time {
+    grid-column: 3;
+  }
+
+  .inbox-item {
+    padding-right: 12px;
+  }
+
+  .cycle-summary-links {
+    display: flex;
+    margin: 4px 0 0;
+  }
+
+  .cycle-summary-links a {
+    padding: 10px 0;
+    margin: -10px 0;
   }
 }
 
@@ -1297,4 +1337,158 @@
   .sidebar-workspace {
     display: none;
   }
+}
+
+.sidebar-badge {
+  min-width: 18px;
+  margin-left: auto;
+  padding: 0 var(--gap-small);
+  border-radius: 9px;
+  background: var(--acc);
+  color: var(--bg);
+  font-size: var(--text-small);
+  font-weight: var(--weight-medium);
+  line-height: 18px;
+  text-align: center;
+}
+
+.sidebar-item-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.simple-row {
+  display: grid;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.simple-row.is-cycle {
+  grid-template-columns: minmax(0, 1fr) 88px minmax(0, 1fr) minmax(200px, 1.4fr);
+}
+
+.simple-row.is-view {
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) 96px;
+}
+
+.simple-row:hover,
+.simple-row:focus-visible {
+  background: var(--hover);
+}
+
+.simple-row:focus-visible {
+  outline-offset: -2px;
+}
+
+.simple-row-name {
+  overflow: hidden;
+  font-weight: var(--weight-medium);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.simple-row-meta,
+.cycle-state {
+  font-size: var(--text-small);
+  color: var(--mut);
+}
+
+.cycle-state.is-current {
+  color: var(--acc);
+  font-weight: var(--weight-medium);
+}
+
+.cycle-summary-links {
+  display: inline-flex;
+  gap: 12px;
+  margin-left: 12px;
+}
+
+.cycle-summary-links a {
+  color: var(--acc);
+}
+
+.page-header-error {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+.inbox-error {
+  padding: var(--gap) 24px 0;
+}
+
+.inbox-item {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+  padding-right: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.inbox-link {
+  display: grid;
+  grid-template-columns: 8px auto minmax(0, 1fr) auto;
+  align-items: center;
+  flex: 1;
+  gap: 10px;
+  min-width: 0;
+  padding: 10px 0 10px 16px;
+}
+
+.inbox-link:hover,
+.inbox-link:focus-visible {
+  background: var(--hover);
+}
+
+.inbox-link:focus-visible {
+  outline-offset: -2px;
+}
+
+.inbox-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.inbox-item.is-unread .inbox-dot {
+  background: var(--acc);
+}
+
+.inbox-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.inbox-text strong {
+  font-weight: var(--weight-medium);
+}
+
+.inbox-title {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-small);
+  min-width: 0;
+  overflow: hidden;
+  color: var(--mut);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inbox-item.is-unread .inbox-title {
+  color: var(--tx);
+}
+
+.inbox-time {
+  font-size: var(--text-small);
+  color: var(--mut);
+  white-space: nowrap;
+}
+
+.inbox-toggle {
+  flex: none;
 }

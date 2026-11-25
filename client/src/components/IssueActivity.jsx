@@ -1,7 +1,7 @@
 import { formatDateTime, formatShortDate } from '../lib/format.js'
 import { priorityLabel, statusLabel } from '../lib/issueOptions.js'
 
-const fieldNames = { title: 'title', assignee: 'assignee', project: 'project', dueDate: 'due date', labels: 'labels' }
+const fieldNames = { title: 'title', assignee: 'assignee', project: 'project', cycle: 'cycle', dueDate: 'due date', labels: 'labels' }
 const valueFormatters = { status: statusLabel, priority: priorityLabel, dueDate: formatShortDate }
 
 function describe({ field, fromValue, toValue }) {

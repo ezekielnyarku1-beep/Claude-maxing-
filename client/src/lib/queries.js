@@ -4,6 +4,10 @@ import * as api from './api.js'
 export const useMe = () => useQuery({ queryKey: ['me'], queryFn: api.getMe })
 export const useTeams = () => useQuery({ queryKey: ['teams'], queryFn: api.getTeams })
 export const useTeam = key => useQuery({ queryKey: ['team', key], queryFn: () => api.getTeam(key) })
+export const useCycles = (key, enabled = true) => useQuery({ queryKey: ['cycles', key], queryFn: () => api.getCycles(key), enabled })
+export const useViews = () => useQuery({ queryKey: ['views'], queryFn: api.getViews })
+export const useView = id => useQuery({ queryKey: ['view', id], queryFn: () => api.getView(id) })
+export const useNotifications = () => useQuery({ queryKey: ['notifications'], queryFn: api.getNotifications, refetchInterval: 60000 })
 export const useProjects = (filters = {}) => useQuery({ queryKey: ['projects', filters], queryFn: () => api.getProjects(filters) })
 export const useProject = id => useQuery({ queryKey: ['project', id], queryFn: () => api.getProject(id) })
 export const useIssues = (filters = {}) => useQuery({ queryKey: ['issues', filters], queryFn: () => api.getIssues(filters) })
@@ -24,17 +28,24 @@ function useSaving(mutationFn, keysToRefresh) {
 export const useUpdateWorkspace = () => useSaving(api.updateWorkspace, ['workspace'])
 export const useUpdateUserRole = () => useSaving(({ id, role }) => api.updateUserRole(id, role), ['users', 'me'])
 export const useCreateTeam = () => useSaving(api.createTeam, ['teams', 'users'])
-export const useRenameTeam = () => useSaving(({ key, name }) => api.renameTeam(key, name), ['teams', 'team'])
+export const useUpdateTeam = () => useSaving(({ key, fields }) => api.updateTeam(key, fields), ['teams', 'team', 'cycles', 'issues', 'issue'])
 export const useAddTeamMember = () => useSaving(({ key, userId }) => api.addTeamMember(key, userId), ['team', 'teams', 'users'])
 export const useRemoveTeamMember = () => useSaving(({ key, userId }) => api.removeTeamMember(key, userId), ['team', 'teams', 'users'])
 export const useCreateLabel = () => useSaving(api.createLabel, ['labels'])
 export const useUpdateLabel = () => useSaving(({ id, fields }) => api.updateLabel(id, fields), ['labels', 'issues', 'issue'])
+export const useSaveView = () => useSaving(
+  ({ id, fields }) => (id ? api.updateView(id, fields) : api.createView(fields)),
+  ['views', 'view'],
+)
+export const useDeleteView = () => useSaving(api.deleteView, ['views'])
+export const useMarkNotification = () => useSaving(({ id, read }) => api.markNotification(id, read), ['notifications'])
+export const useMarkAllNotificationsRead = () => useSaving(api.markAllNotificationsRead, ['notifications'])
 export const useSaveProject = () => useSaving(
   ({ id, fields }) => (id ? api.updateProject(id, fields) : api.createProject(fields)),
   ['projects', 'project'],
 )
 
-const workDataKeys = ['issues', 'issue', 'projects', 'project', 'teams', 'team']
+const workDataKeys = ['issues', 'issue', 'projects', 'project', 'teams', 'team', 'cycles']
 const fieldsShownRightAway = ['status', 'priority', 'title', 'description', 'dueDate']
 
 function useRefreshWorkData() {

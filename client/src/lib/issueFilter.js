@@ -5,6 +5,15 @@ export const emptyFilter = { priorities: [], assigneeIds: [], labelIds: [], show
 export const countActiveFilters = filter =>
   filter.priorities.length + filter.assigneeIds.length + filter.labelIds.length + (filter.showClosed ? 0 : 1)
 
+const sortedFilter = filter => ({
+  priorities: [...filter.priorities].sort(),
+  assigneeIds: [...filter.assigneeIds].sort(),
+  labelIds: [...filter.labelIds].sort(),
+  showClosed: filter.showClosed,
+})
+
+export const sameFilter = (a, b) => JSON.stringify(sortedFilter(a)) === JSON.stringify(sortedFilter(b))
+
 export function applyFilter(issues, filter) {
   return issues.filter(issue =>
     (filter.showClosed || !closedStatuses.includes(issue.status)) &&

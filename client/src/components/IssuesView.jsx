@@ -15,9 +15,9 @@ const views = [
   { value: 'board', label: 'Board' },
 ]
 
-export default function IssuesView({ title, filters, teamKey, summary }) {
+export default function IssuesView({ title, filters, teamKey, summary, initialFilter = emptyFilter, actions }) {
   const [searchParams, setSearchParams] = useSearchParams()
-  const [filter, setFilter] = useState(emptyFilter)
+  const [filter, setFilter] = useState(initialFilter)
   const { openCreateIssue } = useShell()
   const issues = useIssues(filters)
   const view = searchParams.get('view') === 'board' ? 'board' : 'list'
@@ -61,6 +61,7 @@ export default function IssuesView({ title, filters, teamKey, summary }) {
               </button>
             ))}
           </div>
+          {actions?.(filter)}
         </PageHeader>
         {summary}
         <QueryState query={issues} label="issues">

@@ -5,9 +5,11 @@ import { errorHandler, notFoundHandler } from './errors.js'
 import { issuesRouter } from './routes/issues.js'
 import { labelsRouter } from './routes/labels.js'
 import { meRouter } from './routes/me.js'
+import { notificationsRouter } from './routes/notifications.js'
 import { projectsRouter } from './routes/projects.js'
 import { teamsRouter } from './routes/teams.js'
 import { usersRouter } from './routes/users.js'
+import { viewsRouter } from './routes/views.js'
 import { workspaceRouter } from './routes/workspace.js'
 
 export function createApp({ clientOrigin, authenticate }) {
@@ -28,6 +30,8 @@ export function createApp({ clientOrigin, authenticate }) {
   app.use('/api/labels', labelsRouter)
   app.use('/api/users', usersRouter)
   app.use('/api/workspace', workspaceRouter)
+  app.use('/api/views', viewsRouter)
+  app.use('/api/notifications', notificationsRouter)
 
   app.use(notFoundHandler)
   app.use(errorHandler)

@@ -3,17 +3,21 @@ import LabelList from './LabelList.jsx'
 import Picker from './Picker.jsx'
 import PriorityIcon from './PriorityIcon.jsx'
 import StatusPicker from './StatusPicker.jsx'
+import { formatDateRange } from '../lib/format.js'
 import { priorities, priorityLabel } from '../lib/issueOptions.js'
-import { useLabels, useProjects, useTeam } from '../lib/queries.js'
+import { useCycles, useLabels, useProjects, useTeam } from '../lib/queries.js'
 
 const priorityOptions = priorities.map(priority => ({ ...priority, icon: <PriorityIcon priority={priority.value} /> }))
 const noneValue = ''
+const cycleName = cycle => `Cycle ${cycle.number} · ${formatDateRange(cycle.startDate, cycle.endDate)}`
 
 export default function IssueProperties({ issue, onSave }) {
   const team = useTeam(issue.team.key)
   const labels = useLabels()
   const projects = useProjects({ team: issue.team.key })
-  const loadError = [team, labels, projects].find(query => query.isError)
+  const cycles = useCycles(issue.team.key)
+  const loadError = [team, labels, projects, cycles].find(query => query.isError)
+  const openCycles = (cycles.data ?? []).filter(cycle => cycle.state !== 'past').reverse()
 
   const assigneeOptions = [
     { value: noneValue, label: 'No assignee' },
@@ -22,6 +26,10 @@ export default function IssueProperties({ issue, onSave }) {
   const projectOptions = [
     { value: noneValue, label: 'No project' },
     ...(projects.data ?? []).map(project => ({ value: project.id, label: project.name })),
+  ]
+  const cycleOptions = [
+    { value: noneValue, label: 'No cycle' },
+    ...openCycles.map(cycle => ({ value: cycle.id, label: cycleName(cycle) })),
   ]
   const labelOptions = (labels.data ?? []).map(label => ({
     value: label.id,
@@ -99,6 +107,21 @@ export default function IssueProperties({ issue, onSave }) {
             buttonContent={issue.project?.name ?? 'No project'}
           />
         </dd>
+        {(openCycles.length > 0 || issue.cycle) && (
+          <>
+            <dt>Cycle</dt>
+            <dd>
+              <Picker
+                label={`Cycle: ${issue.cycle ? cycleName(issue.cycle) : 'No cycle'}`}
+                options={cycleOptions}
+                value={issue.cycle?.id ?? noneValue}
+                onChange={cycleId => onSave({ cycleId: cycleId || null })}
+                buttonClassName="property-button"
+                buttonContent={issue.cycle ? cycleName(issue.cycle) : 'No cycle'}
+              />
+            </dd>
+          </>
+        )}
         <dt>
           <label htmlFor={`due-${issue.id}`}>Due date</label>
         </dt>

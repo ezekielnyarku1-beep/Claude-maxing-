@@ -21,6 +21,12 @@ You need Node.js 22.18 or newer.
 - To make someone an admin, they sign in once, then you run this in `server`: `npm run make-admin -- their@email.com`.
 - Login, password reset and blocking repeated wrong passwords are handled by Neon Auth.
 
+## Cycles, views and inbox
+
+- Cycles: an admin turns them on per team in Settings → Teams (1 or 2 weeks, plus a start date). The app keeps the current and next cycle ready, and unfinished issues move to the current cycle when theirs ends. Dates follow UTC.
+- Views: anyone can save the filters on a team's issues with Save view, or start one on the Views page. Views are private to the person who saved them.
+- Inbox: you get a notification when someone else assigns an issue to you. The sidebar shows how many are unread.
+
 ## Run the app
 
 Open two terminals.

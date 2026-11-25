@@ -8,13 +8,18 @@ import ForgotPasswordPage from './pages/auth/ForgotPasswordPage.jsx'
 import LoginPage from './pages/auth/LoginPage.jsx'
 import ResetPasswordPage from './pages/auth/ResetPasswordPage.jsx'
 import SignUpPage from './pages/auth/SignUpPage.jsx'
+import CyclePage from './pages/CyclePage.jsx'
+import InboxPage from './pages/InboxPage.jsx'
 import IssuePage from './pages/IssuePage.jsx'
 import MyIssuesPage from './pages/MyIssuesPage.jsx'
 import OverviewPage from './pages/OverviewPage.jsx'
 import NotFoundPage from './pages/NotFoundPage.jsx'
 import ProjectPage from './pages/ProjectPage.jsx'
 import ProjectsPage from './pages/ProjectsPage.jsx'
+import TeamCyclesPage from './pages/TeamCyclesPage.jsx'
 import TeamIssuesPage from './pages/TeamIssuesPage.jsx'
+import ViewPage from './pages/ViewPage.jsx'
+import ViewsPage from './pages/ViewsPage.jsx'
 import LabelsSettingsPage from './pages/settings/LabelsSettingsPage.jsx'
 import PersonalSettingsPage from './pages/settings/PersonalSettingsPage.jsx'
 import SettingsLayout from './pages/settings/SettingsLayout.jsx'
@@ -36,7 +41,12 @@ export default function App() {
           <Route index element={<Navigate to="/overview" replace />} />
           <Route path="overview" element={<OverviewPage />} />
           <Route path="my-issues" element={<MyIssuesPage />} />
+          <Route path="inbox" element={<InboxPage />} />
           <Route path="team/:teamKey" element={<TeamIssuesPage />} />
+          <Route path="team/:teamKey/cycles" element={<TeamCyclesPage />} />
+          <Route path="team/:teamKey/cycles/:cycleNumber" element={<CyclePage />} />
+          <Route path="views" element={<ViewsPage />} />
+          <Route path="views/:viewId" element={<ViewPage />} />
           <Route path="projects" element={<ProjectsPage />} />
           <Route path="projects/:projectId" element={<ProjectPage />} />
           <Route path="issue/:identifier" element={<IssuePage />} />

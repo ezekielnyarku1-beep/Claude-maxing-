@@ -2,12 +2,13 @@ import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router'
 import Avatar from './Avatar.jsx'
 import { signOut } from '../lib/auth.js'
-import { useMe, useTeams, useWorkspace } from '../lib/queries.js'
+import { useMe, useNotifications, useTeams, useViews, useWorkspace } from '../lib/queries.js'
 import { useShell } from '../lib/shellContext.js'
 import { useFormAction } from '../lib/useFormAction.js'
 
 const navigation = [
   { to: '/overview', label: 'Overview', path: 'M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z' },
+  { to: '/inbox', label: 'Inbox', path: 'M3 13h5l2 3h4l2-3h5 M5.5 5h13L21 13v6H3v-6z' },
   { to: '/my-issues', label: 'My issues', path: 'm3 6 2 2 4-4 M12 6h9 m-18 9 2 2 4-4 M12 15h9' },
   { to: '/projects', label: 'Projects', path: 'M3 7V4h6l3 3h9v13H3z' },
   { to: '/settings', label: 'Settings', path: 'M4 7h16 M4 17h16 M8 4v6 M16 14v6' },
@@ -20,6 +21,8 @@ export default function Sidebar() {
   const me = useMe()
   const teams = useTeams()
   const workspace = useWorkspace()
+  const views = useViews()
+  const unread = useNotifications().data?.unreadCount ?? 0
   const logOut = useFormAction()
   const isAdmin = me.data?.role === 'ADMIN'
 
@@ -52,6 +55,12 @@ export default function Sidebar() {
                 <path d={item.path} />
               </svg>
               <span>{item.label}</span>
+              {item.to === '/inbox' && unread > 0 && (
+                <span className="sidebar-badge">
+                  {unread > 99 ? '99+' : unread}
+                  <span className="visually-hidden"> unread</span>
+                </span>
+              )}
             </NavLink>
           </li>
         ))}
@@ -89,6 +98,24 @@ export default function Sidebar() {
             </NavLink>
           </li>
         ))}
+      </ul>
+
+      <h2 className="sidebar-heading" id="sidebar-views">
+        Views
+      </h2>
+      <ul className="sidebar-links" aria-labelledby="sidebar-views">
+        {(views.data ?? []).map(view => (
+          <li key={view.id}>
+            <NavLink to={`/views/${view.id}`} className="sidebar-item">
+              <span className="sidebar-item-text">{view.name}</span>
+            </NavLink>
+          </li>
+        ))}
+        <li>
+          <NavLink to="/views" end className="sidebar-item muted">
+            All views
+          </NavLink>
+        </li>
       </ul>
 
       {me.data && (

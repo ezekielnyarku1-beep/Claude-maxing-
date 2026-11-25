@@ -1,3 +1,4 @@
+import { startOfTodayUtc } from './cycles.js'
 import { HttpError } from './errors.js'
 import { toDateString } from './serializers.js'
 
@@ -18,7 +19,7 @@ export async function createIssue(tx, { teamId, actorId, labelIds = [], ...field
   })
 }
 
-export async function checkIssueReferences(tx, teamId, { assigneeId, projectId, labelIds }) {
+export async function checkIssueReferences(tx, teamId, { assigneeId, projectId, cycleId, labelIds }) {
   if (assigneeId) {
     const membership = await tx.teamMember.findUnique({ where: { teamId_userId: { teamId, userId: assigneeId } } })
     if (!membership) throw new HttpError(400, 'The assignee must be a member of the team.')
@@ -27,6 +28,10 @@ export async function checkIssueReferences(tx, teamId, { assigneeId, projectId, 
     const project = await tx.project.findFirst({ where: { id: projectId, teamId } })
     if (!project) throw new HttpError(400, 'The project must belong to the same team.')
   }
+  if (cycleId) {
+    const cycle = await tx.cycle.findFirst({ where: { id: cycleId, teamId, endDate: { gte: startOfTodayUtc() } } })
+    if (!cycle) throw new HttpError(400, 'Pick a current or upcoming cycle from the same team.')
+  }
   if (labelIds?.length) {
     const found = await tx.label.count({ where: { id: { in: labelIds } } })
     if (found !== labelIds.length) throw new HttpError(400, 'One or more labels do not exist.')
@@ -34,6 +39,13 @@ export async function checkIssueReferences(tx, teamId, { assigneeId, projectId, 
 }
 
 const joinNames = labels => labels.map(label => label.name).sort().join(', ') || null
+const cycleName = cycle => (cycle ? `Cycle ${cycle.number}` : null)
+
+export async function notifyAssignee(tx, { issueId, assigneeId, actorId }) {
+  if (assigneeId && assigneeId !== actorId) {
+    await tx.notification.create({ data: { userId: assigneeId, actorId, issueId, type: 'ASSIGNED' } })
+  }
+}
 
 export function describeChanges(before, after) {
   const comparisons = [
@@ -42,6 +54,7 @@ export function describeChanges(before, after) {
     ['priority', before.priority, after.priority],
     ['assignee', before.assignee?.name ?? null, after.assignee?.name ?? null],
     ['project', before.project?.name ?? null, after.project?.name ?? null],
+    ['cycle', cycleName(before.cycle), cycleName(after.cycle)],
     ['dueDate', toDateString(before.dueDate), toDateString(after.dueDate)],
     ['labels', joinNames(before.labels), joinNames(after.labels)],
   ]

@@ -43,9 +43,12 @@ export async function resetDatabase() {
   if (!databaseName.endsWith('_test')) {
     throw new Error(`Refusing to wipe "${databaseName}". Tests only run on a database whose name ends with _test.`)
   }
+  await prisma.notification.deleteMany()
+  await prisma.savedView.deleteMany()
   await prisma.issueActivity.deleteMany()
   await prisma.comment.deleteMany()
   await prisma.issue.deleteMany()
+  await prisma.cycle.deleteMany()
   await prisma.project.deleteMany()
   await prisma.teamMember.deleteMany()
   await prisma.label.deleteMany()
