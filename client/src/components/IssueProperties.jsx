@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import Avatar from './Avatar.jsx'
 import LabelList from './LabelList.jsx'
 import Picker from './Picker.jsx'
@@ -12,6 +13,7 @@ const noneValue = ''
 const cycleName = cycle => `Cycle ${cycle.number} · ${formatDateRange(cycle.startDate, cycle.endDate)}`
 
 export default function IssueProperties({ issue, onSave }) {
+  const [dueDraft, setDueDraft] = useState(null)
   const team = useTeam(issue.team.key)
   const labels = useLabels()
   const projects = useProjects({ team: issue.team.key })
@@ -131,8 +133,13 @@ export default function IssueProperties({ issue, onSave }) {
             id={`due-${issue.id}`}
             type="date"
             className="input"
-            value={issue.dueDate ?? ''}
-            onChange={event => onSave({ dueDate: event.target.value || null })}
+            value={dueDraft ?? issue.dueDate ?? ''}
+            onChange={event => {
+              const value = event.target.value
+              if (value && value < '1000-01-01') return setDueDraft(value)
+              setDueDraft(null)
+              if (value !== (issue.dueDate ?? '')) onSave({ dueDate: value || null })
+            }}
           />
         </dd>
       </dl>

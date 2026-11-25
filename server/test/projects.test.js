@@ -97,3 +97,13 @@ test('project dates and owner are checked', async () => {
   })
   assert.equal(outsider.status, 400)
 })
+
+test('a project can still be edited after its owner leaves the team', async () => {
+  await prisma.teamMember.deleteMany({ where: { userId: fixtures.engUser.id } })
+  const path = `/api/projects/${fixtures.engProject.id}`
+  const kept = await server.call('PATCH', path, { as: admin, body: { name: 'Renamed', ownerId: fixtures.engUser.id } })
+  assert.equal(kept.status, 200)
+  assert.equal(kept.body.name, 'Renamed')
+  const outsider = await server.call('PATCH', path, { as: admin, body: { ownerId: fixtures.desUser.id } })
+  assert.equal(outsider.status, 400)
+})

@@ -59,8 +59,12 @@ export function useUpdateIssue() {
   return useMutation({
     mutationFn: ({ identifier, changes }) => api.updateIssue(identifier, changes),
     onMutate: async ({ identifier, changes }) => {
-      const shown = Object.fromEntries(Object.entries(changes).filter(([field]) => fieldsShownRightAway.includes(field)))
-      await client.cancelQueries({ queryKey: ['issues'] })
+      const labels = client.getQueryData(['labels'])
+      const shown = {
+        ...Object.fromEntries(Object.entries(changes).filter(([field]) => fieldsShownRightAway.includes(field))),
+        ...(changes.labelIds && labels && { labels: labels.filter(label => changes.labelIds.includes(label.id)) }),
+      }
+      await Promise.all([client.cancelQueries({ queryKey: ['issues'] }), client.cancelQueries({ queryKey: ['issue', identifier] })])
       client.setQueriesData({ queryKey: ['issues'] }, issues =>
         issues?.map(issue => (issue.identifier === identifier ? { ...issue, ...shown } : issue)))
       client.setQueryData(['issue', identifier], issue => issue && { ...issue, ...shown })

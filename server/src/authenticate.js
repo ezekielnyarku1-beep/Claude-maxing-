@@ -2,13 +2,18 @@ import { jwtVerify } from 'jose'
 import { prisma } from './db.js'
 import { HttpError } from './errors.js'
 
+const keyServiceErrors = new Set(['ERR_JWKS_TIMEOUT', 'ERR_JWKS_INVALID', 'NO_CODE'])
+
 async function readVerifiedClaims(request, { keySet, issuer }) {
   const [scheme, token] = (request.get('authorization') ?? '').split(' ')
   if (scheme !== 'Bearer' || !token) throw new HttpError(401, 'Sign in to continue.')
   try {
     const { payload } = await jwtVerify(token, keySet, { issuer, audience: issuer, algorithms: ['EdDSA'] })
     return payload
-  } catch {
+  } catch (error) {
+    if (keyServiceErrors.has(error.code ?? 'NO_CODE')) {
+      throw new HttpError(503, 'Sign-in could not be checked right now. Try again in a moment.', { cause: error })
+    }
     throw new HttpError(401, 'Your session has ended. Sign in again.')
   }
 }

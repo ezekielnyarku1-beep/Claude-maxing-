@@ -5,12 +5,14 @@ import CreateIssueDialog from './CreateIssueDialog.jsx'
 import Sidebar from './Sidebar.jsx'
 import { ShellContext } from '../lib/shellContext.js'
 
-const isTypingIn = target => target instanceof Element && target.closest('input, textarea, select, [contenteditable="true"]')
+const isTypingIn = target =>
+  target instanceof Element && target.closest('input, textarea, select, [contenteditable="true"], [role="listbox"], .popover-panel')
 
 export default function Shell() {
   const { pathname } = useLocation()
   const [createIssue, setCreateIssue] = useState({ open: false, teamKey: '', cycleId: null })
   const [commandMenuOpen, setCommandMenuOpen] = useState(false)
+  const settingsOpen = Boolean(matchPath('/settings/*', pathname))
   const pageTeamKey = matchPath('/team/:teamKey', pathname)?.params.teamKey ?? ''
 
   const openCreateIssue = useCallback(
@@ -39,8 +41,8 @@ export default function Shell() {
 
   return (
     <ShellContext.Provider value={shell}>
-      <div className="shell">
-        <Sidebar />
+      <div className={settingsOpen ? 'shell shell-settings' : 'shell'}>
+        {!settingsOpen && <Sidebar />}
         <main className="shell-main">
           <Outlet />
         </main>

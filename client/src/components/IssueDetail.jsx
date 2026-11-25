@@ -5,19 +5,26 @@ import IssueProperties from './IssueProperties.jsx'
 import QueryState from './QueryState.jsx'
 import { useIssue, useUpdateIssue } from '../lib/queries.js'
 
+function useDraft(savedValue, onFinish) {
+  const [draft, setDraft] = useState(null)
+  return {
+    value: draft ? draft.value : savedValue,
+    onFocus: () => setDraft({ original: savedValue, value: savedValue }),
+    onChange: event => setDraft({ ...draft, value: event.target.value }),
+    onBlur: () => {
+      const edited = draft.value.trim()
+      setDraft(null)
+      if (edited !== draft.original.trim()) onFinish(edited)
+    },
+  }
+}
+
 function IssueEditor({ issue, headingLevel }) {
   const Heading = headingLevel === 1 ? 'h1' : 'h2'
   const updateIssue = useUpdateIssue()
-  const [title, setTitle] = useState(issue.title)
-  const [description, setDescription] = useState(issue.description)
-
   const save = changes => updateIssue.mutate({ identifier: issue.identifier, changes })
-
-  function saveTitle() {
-    const trimmed = title.trim()
-    if (!trimmed) setTitle(issue.title)
-    else if (trimmed !== issue.title) save({ title: trimmed })
-  }
+  const title = useDraft(issue.title, value => value && save({ title: value }))
+  const description = useDraft(issue.description, value => save({ description: value }))
 
   return (
     <article className="issue-detail">
@@ -35,10 +42,8 @@ function IssueEditor({ issue, headingLevel }) {
       <input
         id={`title-${issue.id}`}
         className="issue-title-input"
-        value={title}
         maxLength={200}
-        onChange={event => setTitle(event.target.value)}
-        onBlur={saveTitle}
+        {...title}
         onKeyDown={event => {
           if (event.key === 'Enter') event.currentTarget.blur()
         }}
@@ -52,11 +57,7 @@ function IssueEditor({ issue, headingLevel }) {
         placeholder="Add a description…"
         rows={4}
         maxLength={10000}
-        value={description}
-        onChange={event => setDescription(event.target.value)}
-        onBlur={() => {
-          if (description !== issue.description) save({ description })
-        }}
+        {...description}
       />
       <IssueProperties issue={issue} onSave={save} />
       <IssueComments issue={issue} />

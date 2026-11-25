@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 
 export default function Dialog({ label, className, onClose, children }) {
   const dialogRef = useRef(null)
+  const pressedOnBackdrop = useRef(false)
 
   useEffect(() => {
     const dialog = dialogRef.current
@@ -19,8 +20,11 @@ export default function Dialog({ label, className, onClose, children }) {
         event.preventDefault()
         onClose()
       }}
+      onPointerDown={event => {
+        pressedOnBackdrop.current = event.target === dialogRef.current
+      }}
       onClick={event => {
-        if (event.target === dialogRef.current) onClose()
+        if (event.target === dialogRef.current && pressedOnBackdrop.current) onClose()
       }}
     >
       {children}

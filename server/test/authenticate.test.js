@@ -101,3 +101,16 @@ test('a blocked account is refused', async () => {
   const response = await callMe(await makeToken({ ...person, banned: true }))
   assert.equal(response.status, 403)
 })
+
+test('when the sign-in keys cannot be fetched, the session is not ended', async () => {
+  const unreachable = await startServer(createAuthenticate({
+    keySet: async () => {
+      throw new TypeError('fetch failed')
+    },
+    issuer,
+  }))
+  const response = await unreachable.call('GET', '/api/me', { headers: { Authorization: `Bearer ${await makeToken(person)}` } })
+  await unreachable.close()
+  assert.equal(response.status, 503)
+  assert.equal(await prisma.user.count(), 0)
+})

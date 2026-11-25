@@ -12,8 +12,12 @@ const messageFor = (error, fallback) => (error.status === 429 ? tooManyAttempts 
 let cachedToken = null
 
 function expiresAt(token) {
-  const payload = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')
-  return JSON.parse(atob(payload)).exp * 1000
+  try {
+    const payload = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')
+    return JSON.parse(atob(payload)).exp * 1000
+  } catch {
+    return 0
+  }
 }
 
 export async function getAccessToken() {

@@ -76,7 +76,7 @@ projectsRouter.patch('/:id', requireAdmin, async (request, response) => {
   const project = await findVisibleProject(request.user, request.params.id)
   const fields = readProjectFields(body, { creating: false })
   await checkProjectFields(project.teamId, {
-    ownerId: fields.ownerId,
+    ownerId: fields.ownerId === project.ownerId ? null : fields.ownerId,
     startDate: 'startDate' in fields ? fields.startDate : project.startDate,
     targetDate: 'targetDate' in fields ? fields.targetDate : project.targetDate,
   })

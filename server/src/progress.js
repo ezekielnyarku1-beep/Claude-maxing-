@@ -10,6 +10,6 @@ export function calculateProgress(countsByStatus) {
     doneCount: count('DONE'),
     inProgressCount: count('IN_PROGRESS'),
     donePercent: percentOfActive(count('DONE')),
-    inProgressPercent: percentOfActive(count('IN_PROGRESS')),
+    inProgressPercent: percentOfActive(count('DONE') + count('IN_PROGRESS')) - percentOfActive(count('DONE')),
   }
 }

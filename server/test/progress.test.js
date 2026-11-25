@@ -36,9 +36,15 @@ test('only canceled issues gives 0% without dividing by zero', () => {
 test('percentages are rounded to whole numbers', () => {
   const progress = calculateProgress({ TODO: 1, IN_PROGRESS: 1, DONE: 1 })
   assert.equal(progress.donePercent, 33)
-  assert.equal(progress.inProgressPercent, 33)
+  assert.equal(progress.inProgressPercent, 34)
 })
 
 test('everything done is 100%', () => {
   assert.equal(calculateProgress({ DONE: 5 }).donePercent, 100)
+})
+
+test('done and in progress never add up to more than 100%', () => {
+  const progress = calculateProgress({ DONE: 1, IN_PROGRESS: 7 })
+  assert.equal(progress.donePercent, 13)
+  assert.equal(progress.inProgressPercent, 87)
 })
