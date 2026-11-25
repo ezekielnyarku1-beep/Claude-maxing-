@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router'
 import PageHeader from '../../components/PageHeader.jsx'
+import { useMe } from '../../lib/queries.js'
 
 const sections = [
   { path: 'workspace', label: 'Workspace' },
@@ -9,11 +10,14 @@ const sections = [
 ]
 
 export default function SettingsLayout() {
+  const { data: user } = useMe()
+
   return (
     <div className="settings">
       <PageHeader title="Settings">
         <nav className="settings-nav" aria-label="Settings sections">
-          {sections.map(section => (
+          <NavLink to="/settings/personal">Personal</NavLink>
+          {user?.role === 'ADMIN' && sections.map(section => (
             <NavLink key={section.path} to={`/settings/${section.path}`}>
               {section.label}
             </NavLink>

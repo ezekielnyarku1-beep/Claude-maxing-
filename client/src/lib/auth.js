@@ -47,6 +47,20 @@ export function signIn(email, password) {
   return startFreshSession(() => authClient.signIn.email({ email, password }), 'Email or password is incorrect.')
 }
 
+export function signInWithGoogle(redirectTo) {
+  const target = safeRedirectPath(redirectTo)
+  const errorCallbackURL = new URL(window.location.pathname, window.location.origin)
+  if (redirectTo) errorCallbackURL.searchParams.set('redirectTo', target)
+  return callAuth(
+    () => authClient.signIn.social({
+      provider: 'google',
+      callbackURL: new URL(target, window.location.origin).href,
+      errorCallbackURL: errorCallbackURL.href,
+    }),
+    'Google sign-in could not start. Try again.',
+  )
+}
+
 export function signUp({ name, email, password }) {
   return startFreshSession(
     () => authClient.signUp.email({ name, email, password }),
@@ -75,5 +89,5 @@ export function resetPassword(token, newPassword) {
 }
 
 export function safeRedirectPath(value) {
-  return value && value.startsWith('/') && !value.startsWith('//') && !value.startsWith('/\\') ? value : '/my-issues'
+  return value && value.startsWith('/') && !value.startsWith('//') && !value.startsWith('/\\') ? value : '/overview'
 }

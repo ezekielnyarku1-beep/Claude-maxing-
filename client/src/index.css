@@ -1,12 +1,15 @@
 :root {
-  --bg: #f6f7f9;
-  --panel: #ffffff;
-  --line: #e3e6ec;
-  --tx: #1b1f27;
-  --mut: #6b7385;
-  --acc: #0e8f78;
-  --hover: #eef0f4;
-  --danger: #c2362b;
+  --bg: light-dark(#f6f7f9, #101217);
+  --panel: light-dark(#ffffff, #171a21);
+  --line: light-dark(#e3e6ec, #252a34);
+  --tx: light-dark(#1b1f27, #e8eaee);
+  --mut: light-dark(#6b7385, #8b93a3);
+  --acc: light-dark(#0e8f78, #3dd6b5);
+  --hover: light-dark(#eef0f4, #1d212a);
+  --danger: light-dark(#c2362b, #ff7b72);
+  --google-fill: light-dark(#ffffff, #131314);
+  --google-stroke: light-dark(#747775, #8e918f);
+  --google-text: light-dark(#1f1f1f, #e3e3e3);
 
   --font-sans: "Geist", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --text-base: 13px;
@@ -15,7 +18,11 @@
   --text-page-title: 16px;
   --text-panel-title: 18px;
   --text-auth-title: 20px;
+  --text-auth-body: 14px;
+  --text-auth-input: 16px;
   --text-banner: clamp(36px, 4.2vw, 58px);
+  --text-google: 14px;
+  --line-google: 20px;
   --weight-regular: 400;
   --weight-medium: 500;
   --weight-semibold: 600;
@@ -28,22 +35,26 @@
   --row-menu: 28px;
   --control-height: 28px;
   --tap-target: 40px;
+  --overview-padding: 24px;
+  --overview-gap: 32px;
 
+  --motion-fast: 120ms;
+  --motion: 180ms;
+  --motion-slow: 260ms;
+  --motion-delay: 300ms;
+  --ease-out: cubic-bezier(0.2, 0.7, 0.3, 1);
+  --press-scale: 0.97;
+  --lift: -1px;
+
+  color-scheme: light dark;
+}
+
+:root[data-appearance="light"] {
   color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #101217;
-    --panel: #171a21;
-    --line: #252a34;
-    --tx: #e8eaee;
-    --mut: #8b93a3;
-    --acc: #3dd6b5;
-    --hover: #1d212a;
-    --danger: #ff7b72;
-    color-scheme: dark;
-  }
+:root[data-appearance="dark"] {
+  color-scheme: dark;
 }
 
 *,

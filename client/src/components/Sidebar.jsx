@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router'
 import Avatar from './Avatar.jsx'
 import { signOut } from '../lib/auth.js'
@@ -5,7 +6,15 @@ import { useMe, useTeams, useWorkspace } from '../lib/queries.js'
 import { useShell } from '../lib/shellContext.js'
 import { useFormAction } from '../lib/useFormAction.js'
 
+const navigation = [
+  { to: '/overview', label: 'Overview', path: 'M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z' },
+  { to: '/my-issues', label: 'My issues', path: 'm3 6 2 2 4-4 M12 6h9 m-18 9 2 2 4-4 M12 15h9' },
+  { to: '/projects', label: 'Projects', path: 'M3 7V4h6l3 3h9v13H3z' },
+  { to: '/settings', label: 'Settings', path: 'M4 7h16 M4 17h16 M8 4v6 M16 14v6' },
+]
+
 export default function Sidebar() {
+  const [menuOpen, setMenuOpen] = useState(false)
   const { openCreateIssue, openCommandMenu } = useShell()
   const navigate = useNavigate()
   const me = useMe()
@@ -15,7 +24,7 @@ export default function Sidebar() {
   const isAdmin = me.data?.role === 'ADMIN'
 
   return (
-    <nav className="sidebar" aria-label="Main">
+    <nav className="sidebar" aria-label="Main" onKeyDown={event => { if (event.key === 'Escape' && menuOpen) { setMenuOpen(false); document.getElementById('navigation-toggle')?.focus() } }}>
       <div className="sidebar-brand">
         <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
           <rect x="1" y="9" width="4" height="8" rx="1" />
@@ -28,36 +37,37 @@ export default function Sidebar() {
         </span>
       </div>
 
+      <button type="button" id="navigation-toggle" className="navigation-toggle icon-button"
+        aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen}
+        aria-controls="navigation-extra" onClick={() => setMenuOpen(open => !open)}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
+          <path d={menuOpen ? 'm6 6 12 12 M6 18 18 6' : 'M4 6h16 M4 12h16 M4 18h16'} />
+        </svg>
+      </button>
+      <ul className="sidebar-links primary-navigation">
+        {navigation.map(item => (
+          <li key={item.to}>
+            <NavLink to={item.to} className="sidebar-item" onClick={() => setMenuOpen(false)}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d={item.path} />
+              </svg>
+              <span>{item.label}</span>
+            </NavLink>
+          </li>
+        ))}
+      </ul>
+      <div id="navigation-extra" className={menuOpen ? 'navigation-extra is-open' : 'navigation-extra'}
+        onClick={event => { if (event.target.closest('a')) setMenuOpen(false) }}>
       <div className="sidebar-actions">
-        <button type="button" className="sidebar-item" onClick={openCommandMenu}>
+        <button type="button" className="sidebar-item" onClick={() => { setMenuOpen(false); openCommandMenu() }}>
           Search
           <kbd aria-hidden="true">Ctrl K</kbd>
         </button>
-        <button type="button" className="sidebar-item" onClick={() => openCreateIssue()}>
+        <button type="button" className="sidebar-item" onClick={() => { setMenuOpen(false); openCreateIssue() }}>
           New issue
           <kbd aria-hidden="true">C</kbd>
         </button>
       </div>
-
-      <ul className="sidebar-links">
-        <li>
-          <NavLink to="/my-issues" className="sidebar-item">
-            My issues
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/projects" className="sidebar-item">
-            Projects
-          </NavLink>
-        </li>
-        {isAdmin && (
-          <li>
-            <NavLink to="/settings" className="sidebar-item">
-              Settings
-            </NavLink>
-          </li>
-        )}
-      </ul>
 
       <h2 className="sidebar-heading" id="sidebar-teams">
         Teams
@@ -104,6 +114,7 @@ export default function Sidebar() {
           {logOut.error}
         </p>
       )}
+      </div>
     </nav>
   )
 }
