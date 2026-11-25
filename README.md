@@ -18,4 +18,4 @@ Run `npm run build`, then provide the environment variables from `.env.example` 
 
 ## Deploy on Vercel
 
-Keep the project root set to the repository root. Vercel serves the Vite build and the `api/[...path].mjs` function handles Better Auth requests. Set `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, and `APP_ORIGIN` in the Vercel project's Production environment. Use the pooled database URL and set both URL values to the app's public HTTPS origin. SMTP variables are optional unless password-reset email is needed.
+Keep the project root set to the repository root. Vercel serves the Vite build, `api/auth/[...path].mjs` handles Better Auth requests, and `api/app-config.mjs` serves app configuration. Set `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, and `APP_ORIGIN` in the Vercel project's Production environment. Use the pooled database URL and set both URL values to the app's public HTTPS origin. SMTP variables are optional unless password-reset email is needed.
