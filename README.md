@@ -15,3 +15,7 @@ The migration command uses the direct URL; the running app uses the pooled URL. 
 ## Production
 
 Run `npm run build`, then provide the environment variables from `.env.example` and run `npm start`. The production server serves the built UI and Better Auth API from one origin. Set `BETTER_AUTH_URL` and `APP_ORIGIN` to the public HTTPS origin before deployment.
+
+## Deploy on Vercel
+
+Keep the project root set to the repository root. Vercel serves the Vite build and the `api/[...path].mjs` function handles Better Auth requests. Set `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, and `APP_ORIGIN` in the Vercel project's Production environment. Use the pooled database URL and set both URL values to the app's public HTTPS origin. SMTP variables are optional unless password-reset email is needed.
